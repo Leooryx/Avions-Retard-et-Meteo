@@ -5,10 +5,10 @@ Effects of Linguistic Diversity on Language Acquisition
 This project aims at linking elements of linguistic diversity and characteristics concerning children's learning (speaking / writing)
 For example: is a language with difficult grammar or spelling longer to learn? 
 
-#Source 
+# Source 
 https://wals.info/ 
 
-#Some insights / thoughts
+# Some insights / thoughts
 ## What languages to select
 Preferably diverse languages
 Constraints: data should be available + these languages must be dominant / mother tongue in the country 
