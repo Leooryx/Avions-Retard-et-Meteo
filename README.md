@@ -14,3 +14,6 @@ Preferably diverse languages
 Constraints: data should be available + these languages must be dominant / mother tongue in the country 
 Quick selection: French, German, Chinese, Japanese, Korean, ...
 
+# Forgotten things
+gitignore file
+
