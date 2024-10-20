@@ -32,4 +32,4 @@ language_df = language_df.drop(columns=["84A Order of Object, Oblique, and Verb"
 #3rd step: Deletion of some languages
 print(language_df['Name'])
 
-languages_of_interest = 
+languages_of_interest = n
