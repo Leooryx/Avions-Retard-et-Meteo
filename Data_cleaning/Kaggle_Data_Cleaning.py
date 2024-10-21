@@ -67,3 +67,4 @@ print(language_df[language_df['Name'] == 'Dutch'].T)
 for i in language_df[language_df['Name'] == 'Dutch'].T.itertuples():
     print(i)
 
+z
