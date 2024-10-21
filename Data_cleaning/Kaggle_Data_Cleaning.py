@@ -67,4 +67,7 @@ print(language_df[language_df['Name'] == 'Dutch'].T)
 for i in language_df[language_df['Name'] == 'Dutch'].T.itertuples():
     print(i)
 
-z
+#Exporting the dataframe to complete it manually
+#pip3 install openpyxl
+import openpyxl
+language_df.to_excel('/home/onyxia/work/Effects-Language-Diversity/Data_cleaning/languages_to_complete.xlsx')
