@@ -20,4 +20,4 @@ print(page.find_all("table"))'''
 #i found the dataset downloaded by someone here: 
 #https://www.kaggle.com/code/kerneler/starter-wals-dataset-ddb3fac7-a
 
-
+c
