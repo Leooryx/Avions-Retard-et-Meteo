@@ -4,13 +4,14 @@
 
 import pandas as pd
 
-# 6 steps : 
+# Steps : 
 # -	Eliminate the useless columns used for language identification
 # -	Eliminate the columns for non-interesting grammatical features
 # -	Eliminate the languages that has not been retained
 # -	Eliminate the columns for which there are too many missing values OR the languages with too many missing values (needs to count the number of missing values per row and per columns)
 # -	Eliminate the columns for which there are too many similarities (needs to do a kind of exploratory statistical investigation). 
 # - Make all the str values of the variable as int or float
+# - Use advanced statistical methods to eliminate the last variables 
 
 
 language_df = pd.read_csv("/home/onyxia/work/Effects-Language-Diversity/Data_cleaning/language.csv")
