@@ -17,3 +17,6 @@ Quick selection: French, German, Chinese, Japanese, Korean, ...
 # Forgotten things
 gitignore file
 
+# TODO
+Data cleaning: faire du webscraping pour récupérer les valeurs des catégories intéressantes (liste donnée sur WhatsApp) --> créer un dictionnaire avec une liste de tuples {catégorie : [(valeur 1, 1)]}
+
