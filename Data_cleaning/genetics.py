@@ -96,7 +96,6 @@ for i in all_links:
 
 
 import os
-from ftplib import FTP
 import subprocess
 import pyranges as pr
 
@@ -104,49 +103,28 @@ import pyranges as pr
 links_file = "/home/onyxia/work/Effects-Language-Diversity/Data_cleaning/cram_links.txt"
 output_dir = "/home/onyxia/work/Effects-Language-Diversity/Data_cleaning/downloads"
 
-def download_cram_with_ftplib(ftp_url, output_dir):
-    """Télécharge un fichier CRAM depuis un lien FTP avec ftplib."""
+def download_chromosome_1(ftp_url, output_dir):
+    """Télécharge les alignements pour le chromosome 1 depuis un fichier CRAM."""
     os.makedirs(output_dir, exist_ok=True)
-    file_name = os.path.basename(ftp_url)
-    file_path = os.path.join(output_dir, file_name)
+    file_name = os.path.basename(ftp_url).replace(".cram", "_chr1.bam")
+    output_file = os.path.join(output_dir, file_name)
 
-    if os.path.exists(file_path):
-        print(f"Fichier déjà téléchargé : {file_path}")
-        return file_path
+    if os.path.exists(output_file):
+        print(f"Fichier déjà téléchargé : {output_file}")
+        return output_file
 
-    print(f"Téléchargement de {file_name} depuis {ftp_url}...")
-
-    # Extraire l'hôte et le chemin
-    ftp_host = "ftp.sra.ebi.ac.uk"
-    ftp_path = ftp_url.replace(f"ftp://{ftp_host}/", "")
-
-    # Connexion au serveur FTP
-    ftp = FTP(ftp_host)
-    ftp.login()  # Connexion anonyme
-
-    # Naviguer vers le répertoire contenant le fichier
-    directory = os.path.dirname(ftp_path)
-    ftp.cwd(directory)
-
-    # Télécharger le fichier
-    with open(file_path, "wb") as f:
-        ftp.retrbinary(f"RETR {file_name}", f.write)
-
-    ftp.quit()
-    print(f"Fichier téléchargé : {file_path}")
-    return file_path
-
-def convert_cram_to_bam(cram_path, output_dir):
-    """Convertit un fichier CRAM en BAM à l'aide de samtools."""
-    bam_path = os.path.join(output_dir, os.path.splitext(os.path.basename(cram_path))[0] + ".bam")
-    if os.path.exists(bam_path):
-        print(f"Fichier BAM déjà existant : {bam_path}")
-        return bam_path
-
-    print(f"Conversion de {cram_path} en {bam_path}...")
-    subprocess.run(["samtools", "view", "-b", "-o", bam_path, cram_path], check=True)
-    print(f"Fichier BAM créé : {bam_path}")
-    return bam_path
+    print(f"Extraction des alignements pour le chromosome 1 depuis {ftp_url}...")
+    try:
+        # Exécuter samtools pour extraire les alignements du chromosome 1
+        subprocess.run(
+            ["samtools", "view", "-h", "-o", output_file, ftp_url, "chr1"],
+            check=True
+        )
+        print(f"Fichier téléchargé : {output_file}")
+        return output_file
+    except subprocess.CalledProcessError as e:
+        print(f"Erreur lors de l'extraction de {ftp_url}: {e}")
+        return None
 
 def load_bam_with_pyranges(bam_path):
     """Charge un fichier BAM dans un objet PyRanges."""
@@ -155,7 +133,6 @@ def load_bam_with_pyranges(bam_path):
     print("Données chargées dans PyRanges.")
     return gr
 
-i=0
 # Étape 1 : Lire les liens FTP depuis le fichier cram_links.txt
 with open(links_file, "r") as f:
     ftp_links = [line.strip() for line in f.readlines()]
@@ -163,25 +140,18 @@ with open(links_file, "r") as f:
 # Étape 2 : Traiter chaque fichier CRAM
 for ftp_url in ftp_links:
     try:
-        # Télécharger le fichier CRAM
-        cram_path = download_cram_with_ftplib(ftp_url, output_dir)
+        # Extraire les données pour chromosome 1
+        bam_path = download_chromosome_1(ftp_url, output_dir)
+        if bam_path:
+            # Charger le fichier BAM avec PyRanges
+            gr = load_bam_with_pyranges(bam_path)
 
-        # Convertir le CRAM en BAM
-        bam_path = convert_cram_to_bam(cram_path, output_dir)
-
-        # Charger le BAM avec PyRanges
-        gr = load_bam_with_pyranges(bam_path)
-
-        # Afficher les données PyRanges (limitées pour les grandes données)
-        print(gr.head())
+            # Afficher les données PyRanges (limitées pour les grandes données)
+            print(gr.head())
 
     except Exception as e:
         print(f"Erreur lors du traitement de {ftp_url} : {e}")
-    
-    i+=1
-    if i ==1:
-        break
 
-#Problem: the files are way too big (several GB) and cannot be downloaded
+#doesnt work because chromosome 1 cannot be dowloaded this easily
 
 
