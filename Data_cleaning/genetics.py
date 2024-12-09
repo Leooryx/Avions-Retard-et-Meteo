@@ -182,6 +182,6 @@ for ftp_url in ftp_links:
     if i ==1:
         break
 
-
+#Problem: the files are way too big (several GB) and cannot be downloaded
 
 
