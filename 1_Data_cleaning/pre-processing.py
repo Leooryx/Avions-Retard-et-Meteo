@@ -237,8 +237,35 @@ for col, col_type in column_types.items():
 
 # Afficher les types des colonnes pour vérifier
 #print(weather.dtypes)
-upload_to_s3("Pre-Processed_data", "weather_2017.csv")
 
+
+import numpy as np
+
+# Charger le fichier CSV
+weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
+
+# Extraire les colonnes qui contiennent "Monthly"
+monthly_columns = [col for col in weather.columns if 'Monthly' in col]
+
+# Convertir la colonne DATE en datetime pour faciliter la gestion des mois
+weather['DATE'] = pd.to_datetime(weather['DATE'])
+weather['YearMonth'] = weather['DATE'].dt.to_period('M')  # Extraire l'année et le mois
+
+# Fonction pour remplir les valeurs mensuelles
+for col in monthly_columns:
+    if col in weather.columns:
+        weather[col] = weather.groupby('YearMonth')[col].transform(lambda group: group.ffill().bfill())
+
+# Supprimer la colonne temporaire YearMonth
+weather.drop(columns=['YearMonth'], inplace=True)
+
+# Afficher les premiers résultats pour validation
+print(weather.head())
+
+
+
+#upload_to_s3("Pre-Processed_data", "weather_2017.csv")
+print(weather_2017.head())
 
 
 

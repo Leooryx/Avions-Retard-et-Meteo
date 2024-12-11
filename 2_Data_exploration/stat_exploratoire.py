@@ -83,26 +83,6 @@ def upload_to_s3(folder, file_name):
 
 #PARTIE 2 : Analyse exploratoire
 
-def upload_plot_to_s3(folder, file_name):
-    """
-    Sauvegarde un document un dossier spécifique d'un bucket S3.
-
-    Args:
-        folder (str): Le nom du dossier dans lequel enregistrer le document.
-        file_name (str): Le nom du fichier à enregistrer.
-    """
-
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)  # Remettre le pointeur du buffer au début
-
-    try:
-        s3_client.upload_fileobj(buffer, bucket_name, f"{folder}/{file_name}")
-        print(f"Le graphique a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
-    except Exception as e:
-        print(f"Une erreur s'est produite lors du chargement : {e}")
-
-    buffer.close()
 
 
 print("\nRésumé statistique des vols :")
