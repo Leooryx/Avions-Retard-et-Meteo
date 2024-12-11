@@ -13,7 +13,6 @@ import seaborn as sns
 import io
 
 
-
 # PARTIE 1 : Récupération des données
 
 bucket_name = "avion-et-meteo"
