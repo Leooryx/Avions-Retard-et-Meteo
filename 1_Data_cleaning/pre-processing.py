@@ -9,22 +9,20 @@
 import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import io
 import os
 
 # PARTIE 1 : Récupération des données
 
 bucket_name = "avion-et-meteo"
-access_key = "NA"
-secret_key = "NA"
+access_key = "AKIAZ3MGNOZKQYJA2U2M"
+secret_key = "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"
 
 #s3://avion-et-meteo/Data-preprocessing/
 
 # Create a session and S3 client
 session = boto3.session.Session()
-s3_client = session.client(
-    service_name='s3',
+s3_client = session.client(service_name='s3',
     aws_access_key_id=access_key,
     aws_secret_access_key=secret_key,
 )
@@ -73,7 +71,7 @@ def upload_to_s3(folder, file_name):
 
     try:
         s3_client.upload_fileobj(buffer, bucket_name, f"{folder}/{file_name}")
-        print(f"Le graphique a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
+        print(f"Le document a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
     except Exception as e:
         print(f"Une erreur s'est produite lors du chargement : {e}")
 
