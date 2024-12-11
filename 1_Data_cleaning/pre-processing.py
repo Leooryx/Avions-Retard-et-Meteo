@@ -6,14 +6,32 @@
 #aws configure
 #keys, region and default output format (txt)
 
+
+
+
+
 import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
 import os
 
-# PARTIE 1 : Récupération des données
+def load_env(file_path=".env"):
+    with open(file_path, "r") as file:
+        for line in file:
+            if "=" in line and not line.startswith("#"):
+                key, value = line.strip().split("=", 1)
+                os.environ[key] = value
 
+# Chargez les variables
+load_env()
+
+access_key = os.getenv("access_key")
+secret_key = os.getenv("secret_key")
+print(secret_key)
+
+# PARTIE 1 : Récupération des données
+'''
 bucket_name = "avion-et-meteo"
 access_key = "NA"
 secret_key = "NA"
@@ -222,7 +240,7 @@ column_types = {
     'MonthlyDeptFromNormalCoolingDD': 'object'
 }
 
-# Conversion des colonnes
+# Conversion des types des colonnes
 for col, col_type in column_types.items():
     if col in weather_2017.columns:
         try:
@@ -304,3 +322,4 @@ print(len(weather_2017)) #13027
 
 
 
+'''
