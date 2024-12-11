@@ -116,6 +116,11 @@ JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE'])
 JFK_2017['WEATHER_DELAY'] = JFK_2017['WEATHER_DELAY'].fillna(0)
 upload_to_s3("Pre-Processed_data", "JFK_2017.csv")
 
+
+
+
+#Partie 1.2 : Pre-processing the weather data
+
 weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
 print(weather.info()) #beaucoup de type ne sont pas bien définis
 #90 colonnes
@@ -124,12 +129,6 @@ weather['DATE'] = pd.to_datetime(weather['DATE'])
 weather_2017 = weather[weather['DATE'].dt.year == 2017]
 #print(weather_2017.head())
 #print(weather_2017.tail())
-
-
-#PArtie 1.2 : Pre-processing the weather data
-
-# Charger le fichier CSV
-weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
 
 # Dictionnaire pour mapper les colonnes avec leur type attendu
 column_types = {
@@ -184,7 +183,7 @@ column_types = {
     'MonthlyMinSeaLevelPressureDate': 'int64',
     'MonthlyMinSeaLevelPressureTime': 'int64',
 
-    # Object (string)
+    # Object (string) #a changer !!!!! ______________________________________
     'STATION': 'object',
     'STATION_NAME': 'object',
     'DATE': 'object',
@@ -225,47 +224,77 @@ column_types = {
 
 # Conversion des colonnes
 for col, col_type in column_types.items():
-    if col in weather.columns:
+    if col in weather_2017.columns:
         try:
-            weather[col] = weather[col].astype(col_type)
+            weather_2017[col] = weather_2017[col].astype(col_type)
         except ValueError:
             print(f"Erreur de conversion pour la colonne {col} vers {col_type}. Utilisation de valeurs NaN pour les valeurs non compatibles.")
             if col_type == 'float64':
-                weather[col] = pd.to_numeric(weather[col], errors='coerce')
+                weather_2017[col] = pd.to_numeric(weather_2017[col], errors='coerce')
             elif col_type == 'int64':
-                weather[col] = pd.to_numeric(weather[col], errors='coerce').astype('Int64')
+                weather_2017[col] = pd.to_numeric(weather_2017[col], errors='coerce').astype('Int64')
 
 # Afficher les types des colonnes pour vérifier
-#print(weather.dtypes)
+print(weather_2017.dtypes)
+print(weather_2017.head())
 
 
-import numpy as np
 
-# Charger le fichier CSV
-weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
 
-# Extraire les colonnes qui contiennent "Monthly"
-monthly_columns = [col for col in weather.columns if 'Monthly' in col]
 
-# Convertir la colonne DATE en datetime pour faciliter la gestion des mois
-weather['DATE'] = pd.to_datetime(weather['DATE'])
-weather['YearMonth'] = weather['DATE'].dt.to_period('M')  # Extraire l'année et le mois
+# Extraire les colonnes qui contiennent "Monthly", "Hourly" ou "Daily"
+monthly_columns = [col for col in weather_2017.columns if 'Monthly' in col]
+hourly_columns = [col for col in weather_2017.columns if 'HOURLY' in col]
+daily_columns = [col for col in weather_2017.columns if 'DAILY' in col]
 
-# Fonction pour remplir les valeurs mensuelles
-for col in monthly_columns:
-    if col in weather.columns:
-        weather[col] = weather.groupby('YearMonth')[col].transform(lambda group: group.ffill().bfill())
+# Convertir la colonne DATE en datetime pour faciliter la gestion des périodes
+weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
+weather_2017['YearMonth'] = weather_2017['DATE'].dt.to_period('M')  # Extraire l'année et le mois
+weather_2017['YearDayHour'] = weather_2017['DATE'].dt.to_period('H')  # Extraire l'année, jour et heure
+weather_2017['YearDay'] = weather_2017['DATE'].dt.to_period('D')  # Extraire l'année et jour
 
-# Supprimer la colonne temporaire YearMonth
-weather.drop(columns=['YearMonth'], inplace=True)
+# Fonction pour remplir les valeurs par mois / jour / heure
+def fill_periodic_values(df, columns, period_key):
+    for col in columns:
+        if col in df.columns:
+            # Utiliser les groupes par période pour remplir les NaN avec ffill et bfill
+            df[col] = df.groupby(period_key)[col].transform(lambda group: group.ffill().bfill())
+
+fill_periodic_values(weather_2017, monthly_columns, 'YearMonth')
+fill_periodic_values(weather_2017, daily_columns, 'YearDay')
+fill_periodic_values(weather_2017, hourly_columns, 'YearDayHour')
+
+# Supprimer les colonnes temporaires
+weather_2017.drop(columns=['YearMonth', 'YearDayHour', 'YearDay'], inplace=True)
+
+# Vérifier les colonnes contenant des NaN dans weather_2017
+def check_nan_columns(df):
+    nan_columns = df.columns[df.isna().any()].tolist()
+    for col in nan_columns:
+        nan_count = df[col].isna().sum()
+        print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
+
+# Appliquer la vérification
+check_nan_columns(weather_2017)
+
+#Eliminer les colonnes ou les lignes avec trop de valeurs Nan au cas par cas
+# Supprimer les colonnes avec plus de 1000 valeurs NaN
+weather_2017 = weather_2017.dropna(axis=1, thresh=len(weather_2017) - 1000)
+print("Vérification : \n")
+check_nan_columns(weather_2017)
 
 # Afficher les premiers résultats pour validation
-print(weather.head())
+print(weather_2017.head())
+print(len(weather_2017)) #13201
+
+weather_2017 = weather_2017.dropna(axis=0)
+check_nan_columns(weather_2017) #nothing
+print(len(weather_2017)) #13027
 
 
 
 #upload_to_s3("Pre-Processed_data", "weather_2017.csv")
-print(weather_2017.head())
+
 
 
 
