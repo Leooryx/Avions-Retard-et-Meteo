@@ -16,33 +16,33 @@ import matplotlib.pyplot as plt
 import io
 import os
 
-def load_env(file_path=".env"):
-    with open(file_path, "r") as file:
-        for line in file:
-            if "=" in line and not line.startswith("#"):
-                key, value = line.strip().split("=", 1)
-                os.environ[key] = value
 
-# Chargez les variables
-load_env()
+# Ouvrir et lire le fichier .env
+with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
+    for line in f:
+        line = line.strip()
+        # Ignorer les lignes vides ou les commentaires
+        if not line or line.startswith('#'):
+            continue
+        # Séparer la clé de la valeur (en supposant un format key=value)
+        key, value = line.split('=', 1)
+        os.environ[key] = value
 
-access_key = os.getenv("access_key")
-secret_key = os.getenv("secret_key")
-print(secret_key)
+# Maintenant que les variables sont chargées dans l'environnement, vous pouvez les récupérer
+s3_access_key_id = os.getenv("S3_ACCESS_KEY_ID")
+s3_secret_access_key = os.getenv("S3_SECRET_ACCESS_KEY")
+print(s3_secret_access_key)
 
-# PARTIE 1 : Récupération des données
-'''
+
 bucket_name = "avion-et-meteo"
-access_key = "NA"
-secret_key = "NA"
 
 #s3://avion-et-meteo/Data-preprocessing/
 
 # Create a session and S3 client
 session = boto3.session.Session()
 s3_client = session.client(service_name='s3',
-    aws_access_key_id=access_key,
-    aws_secret_access_key=secret_key,
+    aws_access_key_id=s3_access_key_id,
+    aws_secret_access_key=s3_secret_access_key,
 )
 
 # List objects in the specific bucket
@@ -322,4 +322,3 @@ print(len(weather_2017)) #13027
 
 
 
-'''
