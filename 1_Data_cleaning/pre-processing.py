@@ -15,8 +15,8 @@ import os
 # PARTIE 1 : Récupération des données
 
 bucket_name = "avion-et-meteo"
-access_key = "AKIAZ3MGNOZKQYJA2U2M"
-secret_key = "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"
+access_key = "NA"
+secret_key = "NA"
 
 #s3://avion-et-meteo/Data-preprocessing/
 
