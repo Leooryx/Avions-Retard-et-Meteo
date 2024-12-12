@@ -28,8 +28,8 @@ with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
         os.environ[key] = value
 
 # Maintenant que les variables sont chargées dans l'environnement, vous pouvez les récupérer
-s3_access_key_id = os.getenv("S3_ACCESS_KEY_ID")
-s3_secret_access_key = os.getenv("S3_SECRET_ACCESS_KEY")
+s3_access_key_id = os.environ["S3_ACCESS_KEY_ID"]
+s3_secret_access_key = os.environ["S3_SECRET_ACCESS_KEY"]
 print(s3_secret_access_key)
 
 
