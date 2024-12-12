@@ -290,6 +290,7 @@ def check_nan_columns(df):
     for col in nan_columns:
         nan_count = df[col].isna().sum()
         print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
+        
 
 # Appliquer la vérification
 check_nan_columns(weather_2017)
