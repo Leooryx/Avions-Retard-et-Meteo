@@ -9,7 +9,6 @@
 #aws configure
 #keys, region and default output format (txt)
 
-
 import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
