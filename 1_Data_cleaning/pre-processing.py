@@ -317,10 +317,7 @@ print(len(weather_2017)) #13201
 weather_2017 = weather_2017.dropna(axis=0)
 check_nan_columns(weather_2017) #nothing
 
-
-
 print(len(weather_2017)) #13027
-
 
 
 #Deletion of useless columns (because of weather encoding standards (str whose meaning is not easily retrievable), complex units like angles, no variance, etc...)
@@ -334,15 +331,15 @@ weather_2017 = weather_2017.replace('T', 0)
 for col in weather_2017.columns:
     weather_2017[col] = weather_2017[col].replace(r'(\d+(\.\d+)?)([^\d\s]+)$', r'\1', regex=True)
 
-weather_2017.to_csv(local_path, index=False)
 
 
 #We set all variables to be float, expect time
-time = weather_2017.iloc[:, 0]
-weather_2017.iloc[:, 1:].astype(float) ########
-weather_2017 = pd.concat([time, weather_2017])
+weather_2017.iloc[:, 1:] = weather_2017.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
+weather_2017['DATE'] = weather_2017.iloc[:, 0]
+weather_2017 = weather_2017[['DATE'] + weather_2017.columns[1:].tolist()]
 
-
+print(weather_2017.head())
+'''
 #we delete columns that represents the same thing but with different units (like celsius VS Farenheit)
 #we keep Fahrenheit because some variables do not have the celsius equivalent (American weather)
 Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
@@ -357,13 +354,65 @@ weather_2017.to_csv(local_path, index=False)
 
 upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
 
-#connecter les bases de données !!!!!!!
 
 
+#Part 1.3: merging the two datasets
 
+JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
 print(JFK_2017['FL_DATE']) #FL_DATE
 
 #for weather its DATE
 
+'''
+'''
+
+# Supposons que les DataFrames sont déjà chargés dans 'JFK_2017' et 'weather_2017'
+
+# 1. Convertir la colonne FL_DATE de JFK_2017 et DATE de weather_2017 en format datetime
+JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE']).dt.date
+weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE']).dt.date
+
+# 2. Agréger les données météo par jour
+# Nous allons prendre des moyennes pour les variables horaires
+weather_aggregated = weather_2017.groupby('DATE').agg({
+    'HOURLYVISIBILITY': 'mean',
+    'HOURLYDRYBULBTEMPF': 'mean',
+    'HOURLYWETBULBTEMPF': 'mean',
+    'HOURLYDewPointTempF': 'mean',
+    'HOURLYRelativeHumidity': 'mean',
+    'HOURLYWindSpeed': 'mean',
+    'HOURLYStationPressure': 'mean',
+    'HOURLYSeaLevelPressure': 'mean',
+    'HOURLYPrecip': 'sum',  # On additionne les précipitations
+    'HOURLYAltimeterSetting': 'mean',
+    'DAILYMaximumDryBulbTemp': 'max',  # Prendre la température maximale
+    'DAILYMinimumDryBulbTemp': 'min',  # Prendre la température minimale
+    'DAILYAverageDryBulbTemp': 'mean',
+    'DAILYDeptFromNormalAverageTemp': 'mean',
+    'DAILYHeatingDegreeDays': 'sum',
+    'DAILYCoolingDegreeDays': 'sum',
+    'DAILYSunrise': 'first',  # On garde le premier enregistrement de l'heure du lever du soleil
+    'DAILYSunset': 'first',   # De même pour l'heure du coucher du soleil
+    'DAILYPrecip': 'sum',     # Précipitations totales
+    'DAILYSnowfall': 'sum',   # Neige totale
+    'DAILYSnowDepth': 'max',  # Profondeur maximale de neige
+    'DAILYAverageStationPressure': 'mean',
+    'DAILYAverageWindSpeed': 'mean',
+    'DAILYPeakWindSpeed': 'max', # Vitesse maximale du vent
+    'DAILYSustainedWindSpeed': 'mean',
+    'DAILYSustainedWindDirection': 'mean'
+}).reset_index()
 
 
+merged_df = pd.merge(JFK_2017, weather_aggregated, left_on='FL_DATE', right_on='DATE', how='left')
+
+
+print(merged_df.head())
+
+#Other method: by duplicating the flight data
+#merged_df = pd.merge(JFK_2017, weather_2017, left_on='FL_DATE', right_on='DATE', how='left')
+
+
+
+
+'''
