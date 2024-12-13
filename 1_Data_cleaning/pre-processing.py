@@ -202,7 +202,6 @@ column_types = {
     'MonthlyMinSeaLevelPressureDate': 'int64',
     'MonthlyMinSeaLevelPressureTime': 'int64',
 
-    # Object (string) #a changer !!!!! ______________________________________
     'STATION': 'object',
     'STATION_NAME': 'object',
     'DATE': 'object',
@@ -324,30 +323,81 @@ print(len(weather_2017)) #13027
 
 
 #Deletion of useless columns
-inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS']
+inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS', 'HOURLYWindDirection']
 weather_2017.drop(columns=inutile, inplace=True)
 
 #Hyptohesis: T is used to indicate a quantity observed was too low to be measured, we assume it is equal to zero
 weather_2017 = weather_2017.replace('T', 0)
 
 #Some variables have values equal to a number followed by a character, we keep only the number by using regex
-weather_2017['MonthlyTotalHeatingDegreeDays'] = weather_2017['MonthlyTotalHeatingDegreeDays'].replace(r'\D', '', regex=True).astype(float)
+'''weather_2017['MonthlyTotalHeatingDegreeDays'] = weather_2017['MonthlyTotalHeatingDegreeDays'].replace(r'\D', '', regex=True).astype(float)
 weather_2017['MonthlyDeptFromNormalHeatingDD'] = weather_2017['MonthlyDeptFromNormalHeatingDD'].replace(r'\D', '', regex=True).astype(float)
+weather_2017['HOURLYDewPointTempF'] = weather_2017['HOURLYDewPointTempF'].replace(r'\D', '', regex=True).astype(float)
+weather_2017['HOURLYVISIBILITY'] = weather_2017['HOURLYVISIBILITY'].replace(r'V$', '', regex=True).astype(float) #we replace the last character which is a V by an empty string
+'''
 
+def delete_last_str(df, colonne):
+    """
+    Supprime la dernière chaîne (lettre ou symbole) après un nombre dans une colonne spécifiée
+    du DataFrame en utilisant des expressions régulières.
+    
+    Args:
+    df (pandas.DataFrame): Le DataFrame à modifier.
+    colonne (str): Le nom de la colonne dont la valeur finale doit être supprimée.
+    
+    Returns:
+    pandas.DataFrame: Le DataFrame avec la dernière chaîne supprimée de la colonne.
+    """
+    #we replace the last character which is a V by an empty string
+    df[colonne] = df[colonne].replace(r'(\d+(\.\d+)?)([^\d\s]+)$', r'\1', regex=True)
+
+    return df
+
+for col in weather_2017.columns:
+    weather_2017[col] = weather_2017[col].replace(r'(\d+(\.\d+)?)([^\d\s]+)$', r'\1', regex=True)
+
+weather_2017.to_csv(local_path, index=False)
+
+
+
+
+#We set all variables to be float, expect time
+weather_2017 = weather_2017.iloc[:, 1:].astype(float)
     
 
 #puis supprimer les colonnes qui n'ont aucune variance
+
+variance = weather_2017.iloc[:, 1:].var() #datatime type values do not have variance
+colonnes_zero_variance = variance[variance == 0].index.tolist()
+
+if colonnes_zero_variance:
+    print("Colonnes avec variance égale à zéro :")
+    for col in colonnes_zero_variance:
+        print(col)
+else:
+    print("Aucune colonne avec une variance égale à zéro.")
+
+weather_2017.drop(columns=['MonthlyDaysWithLT0Temp'], inplace=True)
+
+
 #delete columns that represents the same thing but with different units (like celsius VS Farenheit)
+#we keep Fahrenheit because some variables do not have the celsius equivalent (American weather)
+Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
+weather_2017.drop(columns=Celsius, inplace=True)
 
 
-#et convertir tout en float !
-#deleting columns for which the unit is too complex to use, like the angle of the wind. 
+#deleting columns for which the unit is too complex to use
+Complex = ['DAILYSustainedWindDirection']
+weather_2017.drop(columns=Complex, inplace=True)
+
+
 
 weather_2017.to_csv(local_path, index=False)
 
 upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
 
-
+#connecter les bases de données !!!!!!!
+#puis stat exploratoires un autre jour
 
 
 
