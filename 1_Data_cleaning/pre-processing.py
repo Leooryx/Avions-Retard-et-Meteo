@@ -94,6 +94,7 @@ def upload_to_s3(folder, file_name):
 
     buffer.close()
 
+
 #Partie 1.1 : Pre-processing the planes data
 
 #Hypothèse de travail : les avions sont similairement sensibles aux mêmes variations de météo sur leur retard --> on peut généraliser la situation d'un aéroports aux autres
