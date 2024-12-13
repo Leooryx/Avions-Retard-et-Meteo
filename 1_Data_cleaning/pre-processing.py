@@ -295,6 +295,11 @@ def check_nan_columns(df):
         print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
         
 
+#Some variables have value -9999 instead of NaN
+#We replace them by NaN to remove them later
+weather_2017.replace(-9999, np.nan)
+
+
 # Appliquer la vérification
 check_nan_columns(weather_2017)
 
@@ -310,15 +315,22 @@ print(len(weather_2017)) #13201
 
 weather_2017 = weather_2017.dropna(axis=0)
 check_nan_columns(weather_2017) #nothing
+
+
+
 print(len(weather_2017)) #13027
 
 
 
-#Deletion of unuseful columns
+#Deletion of useless columns
 inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS']
 weather_2017.drop(columns=inutile, inplace=True)
-#Deletion of columns with useless values
-#Some columns had almost only the value "T", other has "-999" instead of a NaN value
+
+#Hyptohesis: T is used to indicate a quantity observed was too low to be measured, we assume it is equal to zero
+weather_2017.replace('T', 0)
+
+
+'''#Some columns had almost only the value "T", other has "-9999" instead of a NaN value
 def supprimer_par_valeur(df, valeur):
     """
     Parcourt chaque ligne du DataFrame, indique les colonnes contenant la valeur 'T'
@@ -346,7 +358,7 @@ def supprimer_par_valeur(df, valeur):
 
 
 weather_2017 = supprimer_par_valeur(weather_2017, "T")
-weather_2017 = supprimer_par_valeur(weather_2017, "-9999")
+weather_2017 = supprimer_par_valeur(weather_2017, "-9999")'''
 
 
 
