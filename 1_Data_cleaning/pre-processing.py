@@ -14,9 +14,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import io
 import os
+import numpy as np
 
 
-# Ouvrir et lire le fichier .env
+#Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
     for line in f:
         line = line.strip()
@@ -27,7 +28,7 @@ with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
         key, value = line.split('=', 1)
         os.environ[key] = value
 
-# Maintenant que les variables sont chargées dans l'environnement, vous pouvez les récupérer
+#We can now use the keys
 s3_access_key_id = os.environ["S3_ACCESS_KEY_ID"]
 s3_secret_access_key = os.environ["S3_SECRET_ACCESS_KEY"]
 print(s3_secret_access_key)
@@ -297,7 +298,7 @@ def check_nan_columns(df):
 
 #Some variables have value -9999 instead of NaN
 #We replace them by NaN to remove them later
-weather_2017.replace(-9999, np.nan)
+weather_2017 = weather_2017.replace(-9999, np.nan)
 
 
 # Appliquer la vérification
@@ -327,40 +328,20 @@ inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTT
 weather_2017.drop(columns=inutile, inplace=True)
 
 #Hyptohesis: T is used to indicate a quantity observed was too low to be measured, we assume it is equal to zero
-weather_2017.replace('T', 0)
+weather_2017 = weather_2017.replace('T', 0)
 
+#Some variables have values equal to a number followed by a character, we keep only the number by using regex
+weather_2017['MonthlyTotalHeatingDegreeDays'] = weather_2017['MonthlyTotalHeatingDegreeDays'].replace(r'\D', '', regex=True).astype(float)
+weather_2017['MonthlyDeptFromNormalHeatingDD'] = weather_2017['MonthlyDeptFromNormalHeatingDD'].replace(r'\D', '', regex=True).astype(float)
 
-'''#Some columns had almost only the value "T", other has "-9999" instead of a NaN value
-def supprimer_par_valeur(df, valeur):
-    """
-    Parcourt chaque ligne du DataFrame, indique les colonnes contenant la valeur 'T'
-    et supprime ces colonnes.
     
-    Args:
-    df (pandas.DataFrame): Le DataFrame à modifier.
-    
-    Returns:
-    pandas.DataFrame: Le DataFrame après suppression des colonnes contenant 'T'.
-    """
-    colonnes_a_supprimer = []
-    
-    # Parcourir chaque colonne du DataFrame
-    for col in df.columns:
-        # Vérifier si la valeur est présente dans la colonne
-        if (df[col] == valeur).any():
-            print(f"La valeur {valeur} a été trouvée dans la colonne: {col}")
-            colonnes_a_supprimer.append(col)
-    
-    # Supprimer les colonnes identifiées
-    df_cleaned = df.drop(columns=colonnes_a_supprimer)
-    
-    return df_cleaned
+
+#puis supprimer les colonnes qui n'ont aucune variance
+#delete columns that represents the same thing but with different units (like celsius VS Farenheit)
 
 
-weather_2017 = supprimer_par_valeur(weather_2017, "T")
-weather_2017 = supprimer_par_valeur(weather_2017, "-9999")'''
-
-
+#et convertir tout en float !
+#deleting columns for which the unit is too complex to use, like the angle of the wind. 
 
 weather_2017.to_csv(local_path, index=False)
 
