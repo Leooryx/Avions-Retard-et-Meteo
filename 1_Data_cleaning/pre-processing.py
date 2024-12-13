@@ -257,7 +257,6 @@ print(weather_2017.dtypes)
 print(weather_2017.head())
 local_path = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.xlsx"
 
-weather_2017.to_csv(local_path, index=False)
 
 
 
@@ -313,7 +312,7 @@ weather_2017 = weather_2017.dropna(axis=0)
 check_nan_columns(weather_2017) #nothing
 print(len(weather_2017)) #13027
 
-
+weather_2017.to_csv(local_path, index=False)
 
 upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
 
