@@ -255,6 +255,9 @@ for col, col_type in column_types.items():
 # Afficher les types des colonnes pour vérifier
 print(weather_2017.dtypes)
 print(weather_2017.head())
+local_path = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.xlsx"
+
+weather_2017.to_csv(local_path, index=False)
 
 
 
