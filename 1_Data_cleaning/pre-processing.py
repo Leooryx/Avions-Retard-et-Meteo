@@ -131,7 +131,7 @@ print(JFK_2017.info())
 JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE'])
 #Hypothèse : on remplace les valeurs manquantes de WEATHER_DELAY dans JFK_2017 par 0 car on suppose qu'un retard cause beaucoup de colère et donc sera noté plus fréquemment qu'une absence de retard
 JFK_2017['WEATHER_DELAY'] = JFK_2017['WEATHER_DELAY'].fillna(0)
-upload_to_s3("Pre-Processed_data", "JFK_2017.csv")
+upload_to_s3("Pre-Processed_data", "JFK_2017.xlsx")
 
 
 
@@ -311,7 +311,7 @@ print(len(weather_2017)) #13027
 
 
 
-#upload_to_s3("Pre-Processed_data", "weather_2017.csv")
+upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
 
 
 
