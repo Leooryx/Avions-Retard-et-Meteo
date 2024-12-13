@@ -312,11 +312,47 @@ weather_2017 = weather_2017.dropna(axis=0)
 check_nan_columns(weather_2017) #nothing
 print(len(weather_2017)) #13027
 
+
+
+#Suppression des colonnes qui sont inutiles
+inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS']
+weather_2017.drop(columns=inutile, inplace=True)
+#Supression des colonnes contenant des valeurs inexploitables
+
+
+def supprimer_colonnes_avec_T(df):
+    """
+    Parcourt chaque ligne du DataFrame, indique les colonnes contenant la valeur 'T'
+    et supprime ces colonnes.
+    
+    Args:
+    df (pandas.DataFrame): Le DataFrame à modifier.
+    
+    Returns:
+    pandas.DataFrame: Le DataFrame après suppression des colonnes contenant 'T'.
+    """
+    # Liste des colonnes à supprimer
+    colonnes_a_supprimer = []
+    
+    # Parcourir chaque colonne du DataFrame
+    for col in df.columns:
+        # Vérifier si la valeur 'T' est présente dans la colonne
+        if (df[col] == 'T').any():
+            print(f"La valeur 'T' a été trouvée dans la colonne: {col}")
+            colonnes_a_supprimer.append(col)
+    
+    # Supprimer les colonnes identifiées
+    df_cleaned = df.drop(columns=colonnes_a_supprimer)
+    
+    return df_cleaned
+
+
+result = supprimer_colonnes_avec_T(weather_2017)
+
+
 weather_2017.to_csv(local_path, index=False)
 
 upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
-
-
 
 
 
