@@ -202,6 +202,7 @@ column_types = {
     'MonthlyMinSeaLevelPressureDate': 'int64',
     'MonthlyMinSeaLevelPressureTime': 'int64',
 
+    #str (will be treated later)
     'STATION': 'object',
     'STATION_NAME': 'object',
     'DATE': 'object',
