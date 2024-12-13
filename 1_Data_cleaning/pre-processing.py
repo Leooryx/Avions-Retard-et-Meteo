@@ -314,13 +314,12 @@ print(len(weather_2017)) #13027
 
 
 
-#Suppression des colonnes qui sont inutiles
+#Deletion of unuseful columns
 inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS']
 weather_2017.drop(columns=inutile, inplace=True)
-#Supression des colonnes contenant des valeurs inexploitables
-
-
-def supprimer_colonnes_avec_T(df):
+#Deletion of columns with useless values
+#Some columns had almost only the value "T", other has "-999" instead of a NaN value
+def supprimer_par_valeur(df, valeur):
     """
     Parcourt chaque ligne du DataFrame, indique les colonnes contenant la valeur 'T'
     et supprime ces colonnes.
@@ -331,14 +330,13 @@ def supprimer_colonnes_avec_T(df):
     Returns:
     pandas.DataFrame: Le DataFrame après suppression des colonnes contenant 'T'.
     """
-    # Liste des colonnes à supprimer
     colonnes_a_supprimer = []
     
     # Parcourir chaque colonne du DataFrame
     for col in df.columns:
-        # Vérifier si la valeur 'T' est présente dans la colonne
-        if (df[col] == 'T').any():
-            print(f"La valeur 'T' a été trouvée dans la colonne: {col}")
+        # Vérifier si la valeur est présente dans la colonne
+        if (df[col] == valeur).any():
+            print(f"La valeur {valeur} a été trouvée dans la colonne: {col}")
             colonnes_a_supprimer.append(col)
     
     # Supprimer les colonnes identifiées
@@ -347,7 +345,9 @@ def supprimer_colonnes_avec_T(df):
     return df_cleaned
 
 
-result = supprimer_colonnes_avec_T(weather_2017)
+weather_2017 = supprimer_par_valeur(weather_2017, "T")
+weather_2017 = supprimer_par_valeur(weather_2017, "-9999")
+
 
 
 weather_2017.to_csv(local_path, index=False)
