@@ -177,11 +177,20 @@ JFK_2017.drop(['Hours', 'Minutes', 'departure_time'], axis=1, inplace=True)
 # Show the resulting DataFrame with the combined datetime
 print(JFK_2017[['FL_DATE', 'DEP_TIME', 'Full_Departure_Datetime']].head())
 
+#Isolating the data not to be used for machine learning 
+JKF_no_number_data = JFK_2017[['Full_Departure_Datetime', 'FL_DATE','OP_UNIQUE_CARRIER','OP_CARRIER_AIRLINE_ID','OP_CARRIER','TAIL_NUM','OP_CARRIER_FL_NUM','ORIGIN_AIRPORT_ID','ORIGIN_AIRPORT_SEQ_ID','ORIGIN_CITY_MARKET_ID','DEST_AIRPORT_ID','DEST_CITY_MARKET_ID','DEST', 'DEP_TIME','ARR_TIME']]
+JFK_numbers = JFK_2017[['DEP_DELAY','ARR_DELAY','CANCELLED','CARRIER_DELAY','WEATHER_DELAY','Full_Departure_Datetime']]
+JFK_numbers['CANCELLED'] = JFK_numbers['CANCELLED'].astype(int)
+print(JFK_numbers.info())
 
-#Exporting the dataset
+
+#Exporting the datasets
 JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
 upload_to_s3("Pre-Processed_data", "JFK_2017.xlsx")
-
+JKF_no_number_data.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JKF_no_number_data.xlsx", index=False)
+upload_to_s3("Pre-Processed_data", "JKF_no_number_data.xlsx")
+JFK_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.xlsx", index=False)
+upload_to_s3("Pre-Processed_data", "JFK_numbers.xlsx")
 
 
 '''
