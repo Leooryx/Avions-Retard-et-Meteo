@@ -18,7 +18,7 @@ import io
 import os
 import numpy as np
 
-
+'''
 #Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
     for line in f:
@@ -208,97 +208,6 @@ weather_2017 = weather[weather['DATE'].dt.year == 2017]
 #print(weather_2017.head())
 #print(weather_2017.tail())
 
-'''# Dictionnaire pour mapper les colonnes avec leur type attendu
-column_types = {
-    # Float64
-    'ELEVATION': 'float64',
-    'LATITUDE': 'float64',
-    'LONGITUDE': 'float64',
-    'HOURLYWindGustSpeed': 'float64',
-    'HOURLYPressureTendency': 'float64',
-    'DAILYMaximumDryBulbTemp': 'float64',
-    'DAILYMinimumDryBulbTemp': 'float64',
-    'DAILYAverageDryBulbTemp': 'float64',
-    'DAILYDeptFromNormalAverageTemp': 'float64',
-    'DAILYAverageRelativeHumidity': 'float64',
-    'DAILYAverageDewPointTemp': 'float64',
-    'DAILYAverageWetBulbTemp': 'float64',
-    'DAILYHeatingDegreeDays': 'float64',
-    'DAILYCoolingDegreeDays': 'float64',
-    'DAILYAverageStationPressure': 'float64',
-    'DAILYAverageSeaLevelPressure': 'float64',
-    'DAILYAverageWindSpeed': 'float64',
-    'DAILYPeakWindSpeed': 'float64',
-    'PeakWindDirection': 'float64',
-    'DAILYSustainedWindSpeed': 'float64',
-    'DAILYSustainedWindDirection': 'float64',
-    'MonthlyMaximumTemp': 'float64',
-    'MonthlyMinimumTemp': 'float64',
-    'MonthlyMeanTemp': 'float64',
-    'MonthlyAverageRH': 'float64',
-    'MonthlyDewpointTemp': 'float64',
-    'MonthlyWetBulbTemp': 'float64',
-    'MonthlyAvgHeatingDegreeDays': 'float64',
-    'MonthlyAvgCoolingDegreeDays': 'float64',
-    'MonthlyStationPressure': 'float64',
-    'MonthlySeaLevelPressure': 'float64',
-    'MonthlyAverageWindSpeed': 'float64',
-    'MonthlyDeptFromNormalMaximumTemp': 'float64',
-    'MonthlyDeptFromNormalMinimumTemp': 'float64',
-    'MonthlyDeptFromNormalAverageTemp': 'float64',
-    'MonthlyDaysWithGT90Temp': 'float64',
-    'MonthlyDaysWithLT32Temp': 'float64',
-    'MonthlyDaysWithGT32Temp': 'float64',
-    'MonthlyDaysWithLT0Temp': 'float64',
-    'MonthlyTotalSeasonToDateHeatingDD': 'float64',
-    'MonthlyTotalSeasonToDateCoolingDD': 'float64',
-
-    # Integer
-    'DAILYSunrise': 'int64',
-    'DAILYSunset': 'int64',
-    'MonthlyMaxSeaLevelPressureDate': 'int64',
-    'MonthlyMaxSeaLevelPressureTime': 'int64',
-    'MonthlyMinSeaLevelPressureDate': 'int64',
-    'MonthlyMinSeaLevelPressureTime': 'int64',
-
-    #str (will be treated later)
-    'STATION': 'object',
-    'STATION_NAME': 'object',
-    'DATE': 'object',
-    'REPORTTPYE': 'object',
-    'HOURLYSKYCONDITIONS': 'object',
-    'HOURLYVISIBILITY': 'object',
-    'HOURLYPRSENTWEATHERTYPE': 'object',
-    'HOURLYDRYBULBTEMPF': 'object',
-    'HOURLYDRYBULBTEMPC': 'object',
-    'HOURLYWETBULBTEMPF': 'object',
-    'HOURLYWETBULBTEMPC': 'object',
-    'HOURLYDewPointTempF': 'object',
-    'HOURLYDewPointTempC': 'object',
-    'HOURLYRelativeHumidity': 'object',
-    'HOURLYWindSpeed': 'object',
-    'HOURLYWindDirection': 'object',
-    'HOURLYStationPressure': 'object',
-    'HOURLYPressureChange': 'object',
-    'HOURLYSeaLevelPressure': 'object',
-    'HOURLYPrecip': 'object',
-    'HOURLYAltimeterSetting': 'object',
-    'DAILYWeather': 'object',
-    'DAILYPrecip': 'object',
-    'DAILYSnowfall': 'object',
-    'DAILYSnowDepth': 'object',
-    'MonthlyTotalSnowfall': 'object',
-    'MonthlyDeptFromNormalPrecip': 'object',
-    'MonthlyTotalLiquidPrecip': 'object',
-    'MonthlyGreatestSnowfall': 'object',
-    'MonthlyGreatestSnowfallDate': 'object',
-    'MonthlyGreatestSnowDepth': 'object',
-    'MonthlyGreatestSnowDepthDate': 'object',
-    'MonthlyTotalHeatingDegreeDays': 'object',
-    'MonthlyTotalCoolingDegreeDays': 'object',
-    'MonthlyDeptFromNormalHeatingDD': 'object',
-    'MonthlyDeptFromNormalCoolingDD': 'object'
-}
 
 # Conversion des types des colonnes
 for col, col_type in column_types.items():
@@ -311,7 +220,7 @@ for col, col_type in column_types.items():
                 weather_2017[col] = pd.to_numeric(weather_2017[col], errors='coerce')
             elif col_type == 'int64':
                 weather_2017[col] = pd.to_numeric(weather_2017[col], errors='coerce').astype('Int64')
-'''
+
 # Afficher les types des colonnes pour vérifier
 print(weather_2017.dtypes)
 print(weather_2017.head())
@@ -409,61 +318,105 @@ print(weather_2017.head())
 weather_2017.to_csv(local_path, index=False)
 
 upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
-
-
 '''
+
+
+
 #Part 1.3: merging the two datasets
 
 #JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
-#print(JFK_2017['FL_DATE']) #FL_DATE
+path_JFK = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.xlsx"
+path_weather = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.xlsx"
+
+JFK_numbers = pd.read_csv(path_JFK)
+weather_2017 = pd.read_csv(path_weather)
+
+print(JFK_numbers)
+print(weather_2017)
+#nb of columns to be obtained: 6 + 45 - 1 = 50
+
+#Are any time data equal?
+exact_matches = pd.merge(JFK_numbers, weather_2017, how='inner', left_on='Full_Departure_Datetime', right_on='DATE')
+print(exact_matches) #len 60
+
+JFK_no_exact_match = JFK_numbers[~JFK_numbers['Full_Departure_Datetime'].isin(exact_matches['Full_Departure_Datetime'])]
+print(JFK_no_exact_match) #len ok
+
+
+#be sure of the type
+JFK_no_exact_match['Full_Departure_Datetime'] = pd.to_datetime(JFK_no_exact_match['Full_Departure_Datetime'])
+weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
+
+JFK_no_exact_match['rounded_datetime'] = JFK_no_exact_match['Full_Departure_Datetime'].dt.round('15min')
+weather_2017['rounded_datetime'] = weather_2017['DATE'].dt.round('15min')
+
+'''# Fusion des données sur la colonne arrondie
+merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime', right_on='rounded_datetime')
+
+# Remplissage des valeurs manquantes avec les valeurs les plus proches (backfill ou nearest)
+merged_df = merged_df.fillna(method='nearest')'''
+
+import pandas as pd
+import numpy as np
+from scipy.spatial import cKDTree
+
+# Convertir les colonnes en datetime (si ce n'est pas déjà fait)
+JFK_no_exact_match['Full_Departure_Datetime'] = pd.to_datetime(JFK_no_exact_match['Full_Departure_Datetime'])
+weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
+print(len(JFK_no_exact_match))
+# Arrondir les dates à 15 minutes
+JFK_no_exact_match['rounded_datetime'] = JFK_no_exact_match['Full_Departure_Datetime'].dt.round('15min')
+weather_2017['rounded_datetime'] = weather_2017['DATE'].dt.round('15min')
+#print(len(JFK_no_exact_match))
+# Fusion des données sur la colonne arrondie
+merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime', right_on='rounded_datetime')
+#print(merged_df)
+# Remplissage des valeurs manquantes avec la valeur la plus proche dans le temps en utilisant cKDTree
+'''
+# Créer un tableau des timestamps pour les valeurs non nulles de weather_2017
+weather_tree = cKDTree(weather_2017['rounded_datetime'].values.astype(np.int64).reshape(-1, 1))
+
+# Parcourir toutes les colonnes du dataframe fusionné
+for column in merged_df.columns:
+    # Si la colonne contient des valeurs manquantes (NaN), on va chercher la valeur la plus proche
+    if merged_df[column].isna().any():
+        # Trouver les lignes avec des valeurs manquantes dans la colonne
+        missing_rows = merged_df[merged_df[column].isna()]
+        if not missing_rows.empty:
+            missing_times = missing_rows['rounded_datetime'].values.astype(np.int64).reshape(-1, 1)
+            # Trouver les indices des valeurs les plus proches dans weather_2017
+            dist, idx = weather_tree.query(missing_times, k=1)
+            # Remplir les valeurs manquantes avec la valeur la plus proche pour cette colonne
+            merged_df.loc[merged_df[column].isna(), column] = weather_2017.iloc[idx][column].values
+
+# Afficher le dataframe fusionné avec les valeurs manquantes remplies
+#Be careful for processing, they are three columns for time identification: Full_Departure_Datetime from JFK_numbers, rounded_datetime, and DATE from weather_2017
+print(merged_df.columns)
+#merged_df = pd.concat([exact_matches, merged_df])
+print(merged_df)
+
+
+
+#we replace the calculated values that coincide with exact matches by the real value found in exact matches
+merged_df = merged_df[~merged_df['Full_Departure_Datetime'].isin(exact_matches['Full_Departure_Datetime'])]
+print(merged_df)
+merged_df = pd.concat([exact_matches, merged_df])
+print(merged_df)
+
+
+
+
+
+
+
+#merged_df = pd.merge(JFK_numbers, weather_2017, left_on='Full_Departure_Datetime', right_on='DATE', how='left')
+#print(len(merged_df)) #goal 1919
+#print(merged_df.head())
 
 #for weather its DATE
 
+#upload_to_s3("Pre-Processed_data", "merged_df.xlsx")
 
-
-# 1. Convertir la colonne FL_DATE de JFK_2017 et DATE de weather_2017 en format datetime
-JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE']).dt.date
-weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE']).dt.date
-
-# 2. Agréger les données météo par jour
-# Nous allons prendre des moyennes pour les variables horaires
-weather_aggregated = weather_2017.groupby('DATE').agg({
-    'HOURLYVISIBILITY': 'mean',
-    'HOURLYDRYBULBTEMPF': 'mean',
-    'HOURLYWETBULBTEMPF': 'mean',
-    'HOURLYDewPointTempF': 'mean',
-    'HOURLYRelativeHumidity': 'mean',
-    'HOURLYWindSpeed': 'mean',
-    'HOURLYStationPressure': 'mean',
-    'HOURLYSeaLevelPressure': 'mean',
-    'HOURLYPrecip': 'sum',  # On additionne les précipitations
-    'HOURLYAltimeterSetting': 'mean',
-    'DAILYMaximumDryBulbTemp': 'max',  # Prendre la température maximale
-    'DAILYMinimumDryBulbTemp': 'min',  # Prendre la température minimale
-    'DAILYAverageDryBulbTemp': 'mean',
-    'DAILYDeptFromNormalAverageTemp': 'mean',
-    'DAILYHeatingDegreeDays': 'sum',
-    'DAILYCoolingDegreeDays': 'sum',
-    'DAILYSunrise': 'first',  # On garde le premier enregistrement de l'heure du lever du soleil
-    'DAILYSunset': 'first',   # De même pour l'heure du coucher du soleil
-    'DAILYPrecip': 'sum',     # Précipitations totales
-    'DAILYSnowfall': 'sum',   # Neige totale
-    'DAILYSnowDepth': 'max',  # Profondeur maximale de neige
-    'DAILYAverageStationPressure': 'mean',
-    'DAILYAverageWindSpeed': 'mean',
-    'DAILYPeakWindSpeed': 'max', # Vitesse maximale du vent
-    'DAILYSustainedWindSpeed': 'mean',
-    'DAILYSustainedWindDirection': 'mean'
-}).reset_index()
-
-
-merged_df = pd.merge(JFK_2017, weather_aggregated, left_on='FL_DATE', right_on='DATE', how='left')
-
-
-print(merged_df.head())
-
-#Other method: by duplicating the flight data
-#merged_df = pd.merge(JFK_2017, weather_2017, left_on='FL_DATE', right_on='DATE', how='left')
 
 
 
