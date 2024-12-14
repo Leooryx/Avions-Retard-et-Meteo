@@ -73,6 +73,8 @@ if 'Contents' in response:
 else:
     print("Bucket is empty.")
 
+#Defining functions to be used later
+
 def upload_to_s3(folder, file_name):
     """
     Sauvegarde un document un dossier spécifique d'un bucket S3.
@@ -93,6 +95,12 @@ def upload_to_s3(folder, file_name):
         print(f"Une erreur s'est produite lors du chargement : {e}")
 
     buffer.close()
+
+def check_nan_columns(df):
+    nan_columns = df.columns[df.isna().any()].tolist()
+    for col in nan_columns:
+        nan_count = df[col].isna().sum()
+        print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
 
 
 #Partie 1.1 : Pre-processing the planes data
@@ -124,14 +132,29 @@ december_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_december.csv')
 print(len(december_JFK)) #168
 #Total = 1958
 year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
-
 JFK_2017 = pd.concat(year, ignore_index=True)
 #print(len(JFK_2017))
 print(JFK_2017.info())
+
+
+
+
 #Mettre dans le bon format
 JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE'])
 #Hypothèse : on remplace les valeurs manquantes de WEATHER_DELAY dans JFK_2017 par 0 car on suppose qu'un retard cause beaucoup de colère et donc sera noté plus fréquemment qu'une absence de retard
 JFK_2017['WEATHER_DELAY'] = JFK_2017['WEATHER_DELAY'].fillna(0)
+JFK_2017['DEP_DELAY'] = JFK_2017['DEP_DELAY'].fillna(0)
+JFK_2017['CARRIER_DELAY'] = JFK_2017['CARRIER_DELAY'].fillna(0)
+JFK_2017['WEATHER_DELAY'] = JFK_2017['WEATHER_DELAY'].fillna(0)
+JFK_2017['ARR_DELAY'] = JFK_2017['ARR_DELAY'].fillna(0)
+
+print(JFK_2017['DEP_TIME'])
+
+#Checking NaN
+check_nan_columns(JFK_2017)
+
+
+#Exporting the dataset
 JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
 upload_to_s3("Pre-Processed_data", "JFK_2017.xlsx")
 
@@ -289,13 +312,7 @@ fill_periodic_values(weather_2017, hourly_columns, 'YearDayHour')
 weather_2017.drop(columns=['YearMonth', 'YearDayHour', 'YearDay'], inplace=True)
 
 # Vérifier les colonnes contenant des NaN dans weather_2017
-def check_nan_columns(df):
-    nan_columns = df.columns[df.isna().any()].tolist()
-    for col in nan_columns:
-        nan_count = df[col].isna().sum()
-        print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
-        
-
+     
 #Some variables have value -9999 instead of NaN
 #We replace them by NaN to remove them later
 weather_2017 = weather_2017.replace(-9999, np.nan)
