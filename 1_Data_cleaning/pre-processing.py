@@ -1,3 +1,5 @@
+#Requirements
+
 #pip install boto3
 
 
@@ -102,8 +104,9 @@ def check_nan_columns(df):
         nan_count = df[col].isna().sum()
         print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
 
+#Part 1: Cleaning data (pre-processing)
 
-#Partie 1.1 : Pre-processing the planes data
+#Part 1.1 : Pre-processing the planes data
 
 #Hypothèse de travail : les avions sont similairement sensibles aux mêmes variations de météo sur leur retard --> on peut généraliser la situation d'un aéroports aux autres
 #On décide de se concentrer sur l'aéroport JFK dont le code est : 10135
@@ -193,7 +196,7 @@ JFK_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK
 upload_to_s3("Pre-Processed_data", "JFK_numbers.xlsx")
 
 
-'''
+
 #Partie 1.2 : Pre-processing the weather data
 
 weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
@@ -205,7 +208,7 @@ weather_2017 = weather[weather['DATE'].dt.year == 2017]
 #print(weather_2017.head())
 #print(weather_2017.tail())
 
-# Dictionnaire pour mapper les colonnes avec leur type attendu
+'''# Dictionnaire pour mapper les colonnes avec leur type attendu
 column_types = {
     # Float64
     'ELEVATION': 'float64',
@@ -308,7 +311,7 @@ for col, col_type in column_types.items():
                 weather_2017[col] = pd.to_numeric(weather_2017[col], errors='coerce')
             elif col_type == 'int64':
                 weather_2017[col] = pd.to_numeric(weather_2017[col], errors='coerce').astype('Int64')
-
+'''
 # Afficher les types des colonnes pour vérifier
 print(weather_2017.dtypes)
 print(weather_2017.head())
@@ -357,7 +360,7 @@ check_nan_columns(weather_2017)
 #Eliminer les colonnes ou les lignes avec trop de valeurs Nan au cas par cas
 # Supprimer les colonnes avec plus de 1000 valeurs NaN
 weather_2017 = weather_2017.dropna(axis=1, thresh=len(weather_2017) - 1000)
-print("Vérification : \n")
+print("Vérification : ")
 check_nan_columns(weather_2017)
 
 # Afficher les premiers résultats pour validation
@@ -371,7 +374,7 @@ print(len(weather_2017)) #13027
 
 
 #Deletion of useless columns (because of weather encoding standards (str whose meaning is not easily retrievable), complex units like angles, no variance, etc...)
-inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS', 'HOURLYWindDirection', 'MonthlyDaysWithLT0Temp']
+inutile = ['STATION','STATION_NAME','ELEVATION','LATITUDE','LONGITUDE', 'REPORTTPYE', 'HOURLYSKYCONDITIONS', 'HOURLYWindDirection', 'MonthlyDaysWithLT0Temp', 'DAILYSustainedWindDirection']
 weather_2017.drop(columns=inutile, inplace=True)
 
 #Hyptohesis: T is used to indicate a quantity observed was too low to be measured, we assume it is equal to zero
@@ -383,10 +386,7 @@ for col in weather_2017.columns:
 
 
 
-#We set all variables to be float, expect time
-weather_2017.iloc[:, 1:] = weather_2017.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
-weather_2017['DATE'] = weather_2017.iloc[:, 0]
-weather_2017 = weather_2017[['DATE'] + weather_2017.columns[1:].tolist()]
+
 
 print(weather_2017.head())
 
@@ -396,20 +396,26 @@ Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
 weather_2017.drop(columns=Celsius, inplace=True)
 
 #deleting columns for which the unit is too complex to use
-Complex = ['DAILYSustainedWindDirection']
-weather_2017.drop(columns=Complex, inplace=True)
+#Complex = ['DAILYSustainedWindDirection']
+#weather_2017.drop(columns=Complex, inplace=True)
+
+#We set all variables to be float, expect time
+weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astype(float)], axis=1)
 
 
+#weather_2017 = weather_2017['DATE'] + weather_2017.iloc[:,1:].astype(float)
+print(weather_2017.info())
+print(weather_2017.head())
 weather_2017.to_csv(local_path, index=False)
 
 upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
 
 
-
+'''
 #Part 1.3: merging the two datasets
 
-JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
-print(JFK_2017['FL_DATE']) #FL_DATE
+#JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
+#print(JFK_2017['FL_DATE']) #FL_DATE
 
 #for weather its DATE
 
