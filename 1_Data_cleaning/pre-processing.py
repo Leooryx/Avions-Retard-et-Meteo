@@ -150,8 +150,32 @@ JFK_2017['ARR_DELAY'] = JFK_2017['ARR_DELAY'].fillna(0)
 
 print(JFK_2017['DEP_TIME'])
 
-#Checking NaN
+#Removing NaN per rows
 check_nan_columns(JFK_2017)
+#Colonne 'DEP_TIME' contient 36 valeurs NaN.
+#Colonne 'ARR_TIME' contient 39 valeurs NaN.
+JFK_2017 = JFK_2017.dropna(axis=0)
+check_nan_columns(JFK_2017) #nothing
+print(len(JFK_2017)) #1919
+
+#Combining departure time information to obtain a column with year, month, day, hour, minute
+
+# Step 1: Convert 'Actual Departure Time' from string (hhmm) to a timedelta
+JFK_2017['DEP_TIME'] = JFK_2017['DEP_TIME'].astype(str).str.zfill(4)  # Ensure it's 4 digits
+JFK_2017['Hours'] = JFK_2017['DEP_TIME'].str[:2].astype(int)  # Get hours as integer
+JFK_2017['Minutes'] = JFK_2017['DEP_TIME'].str[2:].astype(int)  # Get minutes as integer
+
+# Create a timedelta object from the hours and minutes
+JFK_2017['departure_time'] = pd.to_timedelta(JFK_2017['Hours'], unit='h') + pd.to_timedelta(JFK_2017['Minutes'], unit='m')
+
+# Step 2: Combine 'FL_DATE' (which is already in datetime) with 'departure_time' to get the full datetime
+JFK_2017['Full_Departure_Datetime'] = JFK_2017['FL_DATE'] + JFK_2017['departure_time']
+
+# Step 3: Drop intermediary columns if not needed
+JFK_2017.drop(['Hours', 'Minutes', 'departure_time'], axis=1, inplace=True)
+
+# Show the resulting DataFrame with the combined datetime
+print(JFK_2017[['FL_DATE', 'Actual Departure Time', 'Full_Departure_Datetime']].head())
 
 
 #Exporting the dataset
