@@ -31,7 +31,6 @@ with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
 #We can now use the keys
 s3_access_key_id = os.environ["S3_ACCESS_KEY_ID"]
 s3_secret_access_key = os.environ["S3_SECRET_ACCESS_KEY"]
-print(s3_secret_access_key)
 
 
 bucket_name = "avion-et-meteo"
@@ -100,7 +99,7 @@ def upload_to_s3(folder, file_name):
 
 #Hypothèse de travail : les avions sont similairement sensibles aux mêmes variations de météo sur leur retard --> on peut généraliser la situation d'un aéroports aux autres
 #On décide de se concentrer sur l'aéroport JFK dont le code est : 10135
-
+#Merging the monthly datasets to obtain a dataset for 2017
 january_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_january.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] #maybe too slow
 print(len(january_JFK)) #191
 february_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_february.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] #maybe too slow
@@ -133,11 +132,12 @@ print(JFK_2017.info())
 JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE'])
 #Hypothèse : on remplace les valeurs manquantes de WEATHER_DELAY dans JFK_2017 par 0 car on suppose qu'un retard cause beaucoup de colère et donc sera noté plus fréquemment qu'une absence de retard
 JFK_2017['WEATHER_DELAY'] = JFK_2017['WEATHER_DELAY'].fillna(0)
+JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
 upload_to_s3("Pre-Processed_data", "JFK_2017.xlsx")
 
 
 
-
+'''
 #Partie 1.2 : Pre-processing the weather data
 
 weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
@@ -339,7 +339,7 @@ weather_2017['DATE'] = weather_2017.iloc[:, 0]
 weather_2017 = weather_2017[['DATE'] + weather_2017.columns[1:].tolist()]
 
 print(weather_2017.head())
-'''
+
 #we delete columns that represents the same thing but with different units (like celsius VS Farenheit)
 #we keep Fahrenheit because some variables do not have the celsius equivalent (American weather)
 Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
@@ -363,10 +363,7 @@ print(JFK_2017['FL_DATE']) #FL_DATE
 
 #for weather its DATE
 
-'''
-'''
 
-# Supposons que les DataFrames sont déjà chargés dans 'JFK_2017' et 'weather_2017'
 
 # 1. Convertir la colonne FL_DATE de JFK_2017 et DATE de weather_2017 en format datetime
 JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE']).dt.date
