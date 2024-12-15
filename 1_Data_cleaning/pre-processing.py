@@ -344,7 +344,7 @@ print(exact_matches) #len 60
 
 JFK_no_exact_match = JFK_numbers[~JFK_numbers['Full_Departure_Datetime'].isin(exact_matches['Full_Departure_Datetime'])]
 print(JFK_no_exact_match) #len ok
-
+print('new test below')
 '''
 #be sure of the type
 JFK_no_exact_match['Full_Departure_Datetime'] = pd.to_datetime(JFK_no_exact_match['Full_Departure_Datetime'])
@@ -366,7 +366,8 @@ from scipy.spatial import cKDTree
 # Convertir les colonnes en datetime (si ce n'est pas déjà fait)
 JFK_no_exact_match['Full_Departure_Datetime'] = pd.to_datetime(JFK_no_exact_match['Full_Departure_Datetime'])
 weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
-print(len(JFK_no_exact_match))
+print(JFK_no_exact_match)
+check_nan_columns(JFK_no_exact_match)
 print('ICICICICICICICIC')
 # Arrondir les dates à 15 minutes
 JFK_no_exact_match['rounded_datetime'] = JFK_no_exact_match['Full_Departure_Datetime'].dt.round('15min')
@@ -376,12 +377,12 @@ print(len(JFK_no_exact_match))
 #jusque ici ok
 
 # Fusion des données sur la colonne arrondie
-#merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime', right_on='rounded_datetime')
-merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime')
+merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime', right_on='rounded_datetime')
+#merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime')
 print(merged_df)
 # Remplissage des valeurs manquantes avec la valeur la plus proche dans le temps en utilisant cKDTree
 
-
+'''
 # Créer un tableau des timestamps pour les valeurs non nulles de weather_2017
 weather_tree = cKDTree(weather_2017['rounded_datetime'].values.astype(np.int64).reshape(-1, 1))
 
@@ -412,7 +413,7 @@ print(merged_df)
 merged_df = pd.concat([exact_matches, merged_df])
 print(merged_df)
 
-
+'''
 
 
 
