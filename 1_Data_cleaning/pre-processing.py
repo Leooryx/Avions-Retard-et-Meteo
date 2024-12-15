@@ -448,7 +448,7 @@ merged_df = pd.DataFrame(merged_rows, columns=np.concatenate([JFK_numbers.column
 
 #pb conversion minute ?
 print(merged_df['Full_Departure_Datetime'])
-
+#only about 10 rows were lost: acceptable 
 merged_df.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.xlsx", index=False)
 upload_to_s3("Pre-Processed_data", "plane_weather.xlsx")
 
