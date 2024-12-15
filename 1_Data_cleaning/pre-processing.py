@@ -422,8 +422,9 @@ print(merged_df)'''
 departure_times = JFK_numbers['Full_Departure_Datetime'].values.astype('datetime64[m]')  # minutes
 weather_times = weather_2017['DATE'].values.astype('datetime64[m]')  # minutes
 
-# Définir la tolérance de correspondance (par exemple, 31 minutes)
-tolerance = np.timedelta64(31, 'm')
+
+#Hypothesis: the weather is the same for each 30-min interval of time
+tolerance = np.timedelta64(30, 'm')
 
 # Créer une liste pour stocker les lignes fusionnées
 merged_rows = []
@@ -448,7 +449,7 @@ merged_df = pd.DataFrame(merged_rows, columns=np.concatenate([JFK_numbers.column
 
 #pb conversion minute ?
 print(merged_df['Full_Departure_Datetime'])
-#only about 10 rows were lost: acceptable 
+#only about 10 rows were lost for a tolerance of 31min: acceptable 
 merged_df.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.xlsx", index=False)
 upload_to_s3("Pre-Processed_data", "plane_weather.xlsx")
 
