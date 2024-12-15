@@ -1,0 +1,47 @@
+1. Tests initiaux : Modèles sans PCA
+Modèles testés : Linear Regression, Random Forest, XGBoost.
+Performances :
+Linear Regression : MAE = 27.75, RMSE = 70.21, R² = 0.03
+Random Forest : MAE = 26.72, RMSE = 73.61, R² = -0.07
+XGBoost : MAE = 27.47, RMSE = 75.37, R² = -0.12
+Conclusion : Résultats médiocres. Linear Regression performe légèrement mieux.
+
+2. Tests avec PCA
+PCA appliquée avec 95% et 80% de variance expliquée.
+Performances (Meilleures itérations avec PCA 0.8) :
+Linear Regression : MAE = 26.68, RMSE = 71.64, R² = -0.01
+Random Forest : MAE = 26.98, RMSE = 73.31, R² = -0.06
+XGBoost : MAE = 25.80, RMSE = 72.05, R² = -0.02
+Conclusion : PCA n'améliore pas significativement les résultats.
+
+3. Optimisation des modèles (Sans PCA, test 10%)
+Optimized XGBoost : MAE = 24.60, RMSE = 76.59, R² = 0.02
+LightGBM : MAE = 27.57, RMSE = 75.80, R² = 0.04
+Conclusion : Optimisation améliore légèrement les résultats avec R² positif pour LightGBM.
+
+4. Traitement des valeurs extrêmes
+Suppression des valeurs extrêmes a fortement réduit MAE et RMSE :
+CatBoost : MAE = 19.67, RMSE = 41.21, R² = -0.25
+XGBoost : MAE = 19.65, RMSE = 42.00, R² = -0.29
+LightGBM : MAE = 22.44, RMSE = 41.72, R² = -0.28
+Conclusion : Bien que R² reste négatif, les métriques MAE et RMSE ont fortement diminué.
+
+5. Rajout de log et polynômes (feature engineering)
+Test inutile : Pas d’amélioration des performances.
+CatBoost : MAE = 19.85, RMSE = 41.23, R² = -0.25.
+
+6. CatBoost optimisé et sélection de features
+En conservant uniquement les 10 principales variables d'importance :
+CatBoost : MAE = 27.68, RMSE = 77.25, R² = -0.18.
+Conclusion : Sélection des top features dégrade les résultats.
+
+7. Modèle hybride (Stacking)
+Combinaison de CatBoost et Linear Regression en modèle stacking :
+Stacking : MAE = 26.00, RMSE = 70.01, R² = 0.03.
+Optimized CatBoost : MAE = 26.11, RMSE = 71.64, R² = -0.01.
+Conclusion : Stacking améliore légèrement les performances globales.
+
+Conclusions Générales
+Optimisation des modèles et suppression des valeurs extrêmes réduisent significativement MAE et RMSE, mais R² reste faible.
+Feature engineering avec des logs ou polynômes ne donne pas de résultats concluants.
+Modèle hybride (Stacking) offre les meilleures performances globales mais reste limité.

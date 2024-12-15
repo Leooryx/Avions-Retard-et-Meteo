@@ -327,8 +327,8 @@ upload_to_s3("Pre-Processed_data", "plane_weather.xlsx")
 print(merged_df.info())
 
 plane_weather_for_ML = merged_df.drop(columns=['Full_Departure_Datetime', 'DATE_weather'])
-plane_weather_for_ML.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.xlsx", index=False)
-upload_to_s3("Pre-Processed_data", "plane_weather_for_ML.xlsx")
+plane_weather_for_ML.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv", index=False)
+upload_to_s3("Pre-Processed_data", "plane_weather_for_ML.csv")
 check_nan_columns(merged_df)
 
 
