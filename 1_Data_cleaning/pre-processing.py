@@ -18,7 +18,7 @@ import io
 import os
 import numpy as np
 
-'''
+
 #Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
     for line in f:
@@ -103,6 +103,8 @@ def check_nan_columns(df):
     for col in nan_columns:
         nan_count = df[col].isna().sum()
         print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
+
+'''
 
 #Part 1: Cleaning data (pre-processing)
 
@@ -324,6 +326,15 @@ upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
 
 #Part 1.3: merging the two datasets
 
+
+
+def check_nan_columns(df):
+    nan_columns = df.columns[df.isna().any()].tolist()
+    for col in nan_columns:
+        nan_count = df[col].isna().sum()
+        print(f"Colonne '{col}' contient {nan_count} valeurs NaN.")
+
+
 #JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
 path_JFK = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.xlsx"
 path_weather = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.xlsx"
@@ -331,8 +342,8 @@ path_weather = "/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather
 JFK_numbers = pd.read_csv(path_JFK)
 weather_2017 = pd.read_csv(path_weather)
 
-print(JFK_numbers)
-print(weather_2017)
+#print(JFK_numbers)
+#print(weather_2017)
 #nb of columns to be obtained: 6 + 45 - 1 = 50
 
 #AUTRE SOLUTION : ne pas faire de merge sur les données exactes ????
@@ -340,92 +351,110 @@ print(weather_2017)
 
 #Are any time data equal?
 exact_matches = pd.merge(JFK_numbers, weather_2017, how='inner', left_on='Full_Departure_Datetime', right_on='DATE')
-print(exact_matches) #len 60
+#print(exact_matches) #len 60
 
 JFK_no_exact_match = JFK_numbers[~JFK_numbers['Full_Departure_Datetime'].isin(exact_matches['Full_Departure_Datetime'])]
-print(JFK_no_exact_match) #len ok
-print('new test below')
-'''
-#be sure of the type
-JFK_no_exact_match['Full_Departure_Datetime'] = pd.to_datetime(JFK_no_exact_match['Full_Departure_Datetime'])
+#print(JFK_no_exact_match) #len ok
+#print('new test below')
+
+
+# Convertir les colonnes de dates en format datetime
+JFK_numbers['Full_Departure_Datetime'] = pd.to_datetime(JFK_numbers['Full_Departure_Datetime'])
 weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
 
-JFK_no_exact_match['rounded_datetime'] = JFK_no_exact_match['Full_Departure_Datetime'].dt.round('15min')
-weather_2017['rounded_datetime'] = weather_2017['DATE'].dt.round('15min')'''
 
-'''# Fusion des données sur la colonne arrondie
-merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime', right_on='rounded_datetime')
 
-# Remplissage des valeurs manquantes avec les valeurs les plus proches (backfill ou nearest)
-merged_df = merged_df.fillna(method='nearest')'''
 
-import pandas as pd
-import numpy as np
-from scipy.spatial import cKDTree
 
-# Convertir les colonnes en datetime (si ce n'est pas déjà fait)
-JFK_no_exact_match['Full_Departure_Datetime'] = pd.to_datetime(JFK_no_exact_match['Full_Departure_Datetime'])
+
+
+
+from datetime import timedelta
+
+# Charger vos deux datasets
+#jfk_df = pd.read_csv('JFK_numbers.csv')
+#weather_df = pd.read_csv('weather_2017.csv')
+
+# Convertir les colonnes de dates en format datetime
+JFK_numbers['Full_Departure_Datetime'] = pd.to_datetime(JFK_numbers['Full_Departure_Datetime'])
 weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
-print(JFK_no_exact_match)
-check_nan_columns(JFK_no_exact_match)
-print('ICICICICICICICIC')
-# Arrondir les dates à 15 minutes
-JFK_no_exact_match['rounded_datetime'] = JFK_no_exact_match['Full_Departure_Datetime'].dt.round('15min')
-weather_2017['rounded_datetime'] = weather_2017['DATE'].dt.round('15min')
-print(len(JFK_no_exact_match))
 
-#jusque ici ok
+'''# Créer un dataframe vide pour stocker le résultat final
+merged_df = pd.DataFrame()
 
-# Fusion des données sur la colonne arrondie
-merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime', right_on='rounded_datetime')
-#merged_df = pd.merge(JFK_no_exact_match, weather_2017, how='left', left_on='rounded_datetime')
-print(merged_df)
-# Remplissage des valeurs manquantes avec la valeur la plus proche dans le temps en utilisant cKDTree
+# Définir la tolérance de correspondance (par exemple, 10 minutes)
+tolerance = timedelta(minutes=31)
 
-'''
-# Créer un tableau des timestamps pour les valeurs non nulles de weather_2017
-weather_tree = cKDTree(weather_2017['rounded_datetime'].values.astype(np.int64).reshape(-1, 1))
+# Parcourir les lignes de JFK_numbers
+for _, jfk_row in JFK_numbers.iterrows():
+    departure_time = jfk_row['Full_Departure_Datetime']
+    print(departure_time)
+    
+    # Trouver la ligne la plus proche dans weather_2017
+    closest_match = None
+    for _, weather_row in weather_2017.iterrows():
+        weather_time = weather_row['DATE']
+        
+        
+        # Vérifier la différence entre les deux dates
+        if abs(departure_time - weather_time) <= tolerance:
+            closest_match = weather_row
+            break  # On peut sortir dès qu'on a trouvé une correspondance
+    
+    # Si une correspondance a été trouvée, fusionner les deux lignes
+    if closest_match is not None:
+        merged_row = pd.concat([jfk_row, closest_match], axis=0)
+        #merged_df = merged_df.append(merged_row, ignore_index=True)
+        merged_df = pd.concat([merged_df, merged_row.to_frame().T], ignore_index=True)
 
-# Parcourir toutes les colonnes du dataframe fusionné
-for column in merged_df.columns:
-    # Si la colonne contient des valeurs manquantes (NaN), on va chercher la valeur la plus proche
-    if merged_df[column].isna().any():
-        # Trouver les lignes avec des valeurs manquantes dans la colonne
-        missing_rows = merged_df[merged_df[column].isna()]
-        if not missing_rows.empty:
-            missing_times = missing_rows['rounded_datetime'].values.astype(np.int64).reshape(-1, 1)
-            # Trouver les indices des valeurs les plus proches dans weather_2017
-            dist, idx = weather_tree.query(missing_times, k=1)
-            # Remplir les valeurs manquantes avec la valeur la plus proche pour cette colonne
-            merged_df.loc[merged_df[column].isna(), column] = weather_2017.iloc[idx][column].values
-
-# Afficher le dataframe fusionné avec les valeurs manquantes remplies
-#Be careful for processing, they are three columns for time identification: Full_Departure_Datetime from JFK_numbers, rounded_datetime, and DATE from weather_2017
-print(merged_df.columns)
-#merged_df = pd.concat([exact_matches, merged_df])
-print(merged_df)
-
-
-
-#we replace the calculated values that coincide with exact matches by the real value found in exact matches
-merged_df = merged_df[~merged_df['Full_Departure_Datetime'].isin(exact_matches['Full_Departure_Datetime'])]
-print(merged_df)
-merged_df = pd.concat([exact_matches, merged_df])
-print(merged_df)
-
-'''
+print(merged_df)'''
 
 
 
 
 
-#merged_df = pd.merge(JFK_numbers, weather_2017, left_on='Full_Departure_Datetime', right_on='DATE', how='left')
-#print(len(merged_df)) #goal 1919
-#print(merged_df.head())
 
-#for weather its DATE
 
-#upload_to_s3("Pre-Processed_data", "merged_df.xlsx")
+
+
+
+# Convertir les dates en numpy.datetime64 pour accélérer les comparaisons
+departure_times = JFK_numbers['Full_Departure_Datetime'].values.astype('datetime64[m]')  # minutes
+weather_times = weather_2017['DATE'].values.astype('datetime64[m]')  # minutes
+
+# Définir la tolérance de correspondance (par exemple, 31 minutes)
+tolerance = np.timedelta64(31, 'm')
+
+# Créer une liste pour stocker les lignes fusionnées
+merged_rows = []
+
+# Parcourir les départs d'avion
+for departure_time in departure_times:
+    # Calculer la différence de temps entre le départ et les dates météo
+    time_differences = np.abs(departure_time - weather_times)
+    
+    # Trouver l'indice du plus petit écart de temps (correspondance la plus proche)
+    closest_index = np.argmin(time_differences)
+    
+    # Si l'écart de temps est inférieur ou égal à la tolérance, ajouter la ligne fusionnée
+    if time_differences[closest_index] <= tolerance:
+        closest_weather_row = weather_2017.iloc[closest_index]
+        jfk_row = JFK_numbers.iloc[np.where(departure_times == departure_time)[0][0]]  # Trouver la ligne correspondante dans JFK_numbers
+        merged_row = pd.concat([jfk_row, closest_weather_row], axis=0)
+        merged_rows.append(merged_row)
+
+# Convertir la liste de lignes fusionnées en DataFrame
+merged_df = pd.DataFrame(merged_rows, columns=np.concatenate([JFK_numbers.columns, weather_2017.columns]))
+
+#pb conversion minute ?
+print(merged_df['Full_Departure_Datetime'])
+
+merged_df.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.xlsx", index=False)
+upload_to_s3("Pre-Processed_data", "plane_weather.xlsx")
+
+
+
+
 
 
 
