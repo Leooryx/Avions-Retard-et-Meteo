@@ -188,12 +188,12 @@ JFK_numbers['CANCELLED'] = JFK_numbers['CANCELLED'].astype(int)
 print(JFK_numbers.info())
 
 #Exporting the dataset for JFK planes
-JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.xlsx", index=False)
-upload_to_s3("Pre-Processed_data", "JFK_2017.xlsx")
-JKF_no_number_data.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JKF_no_number_data.xlsx", index=False)
-upload_to_s3("Pre-Processed_data", "JKF_no_number_data.xlsx")
-JFK_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.xlsx", index=False)
-upload_to_s3("Pre-Processed_data", "JFK_numbers.xlsx")
+JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.csv", index=False)
+upload_to_s3("Pre-Processed_data", "JFK_2017.csv")
+JKF_no_number_data.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JKF_no_number_data.csv", index=False)
+upload_to_s3("Pre-Processed_data", "JKF_no_number_data.csv")
+JFK_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.csv", index=False)
+upload_to_s3("Pre-Processed_data", "JFK_numbers.csv")
 
 
 #Part 1.2 : Pre-processing the weather data
@@ -278,8 +278,8 @@ weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astyp
 
 print(weather_2017.info())
 print(weather_2017.head())
-weather_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.xlsx", index=False)
-upload_to_s3("Pre-Processed_data", "weather_2017.xlsx")
+weather_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.csv", index=False)
+upload_to_s3("Pre-Processed_data", "weather_2017.csv")
 
 
 
@@ -322,8 +322,8 @@ print(merged_df['Full_Departure_Datetime'])
 
 # Uploading the data
 merged_df.rename(columns={'DATE': 'DATE_weather'}, inplace=True)
-merged_df.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.xlsx", index=False)
-upload_to_s3("Pre-Processed_data", "plane_weather.xlsx")
+merged_df.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.csv", index=False)
+upload_to_s3("Pre-Processed_data", "plane_weather.csv")
 print(merged_df.info())
 
 plane_weather_for_ML = merged_df.drop(columns=['Full_Departure_Datetime', 'DATE_weather'])

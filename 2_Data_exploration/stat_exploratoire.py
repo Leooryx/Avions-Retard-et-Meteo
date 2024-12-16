@@ -1,4 +1,9 @@
-#pip install boto3
+#Data-exploration
+
+#Requirements
+
+
+#pas nécessairement utile de télécharger AMZ CLI
 #curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 #unzip awscliv2.zip
 #sudo ./aws/install
@@ -6,27 +11,38 @@
 #aws configure
 #keys, region and default output format (txt)
 
+#pip install boto3
 import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import io
 import os
+import numpy as np
+from datetime import timedelta
 
-# PARTIE 1 : Récupération des données
+
+#Opening and reading the .env file
+with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
+    for line in f:
+        line = line.strip()
+        # Ignorer les lignes vides ou les commentaires
+        if not line or line.startswith('#'):
+            continue
+        # Séparer la clé de la valeur (en supposant un format key=value)
+        key, value = line.split('=', 1)
+        os.environ[key] = value
+
+#We can now use the keys
+s3_access_key_id = os.environ["S3_ACCESS_KEY_ID"]
+s3_secret_access_key = os.environ["S3_SECRET_ACCESS_KEY"]
 
 bucket_name = "avion-et-meteo"
-access_key = "NA"
-secret_key = "NA"
-
-#s3://avion-et-meteo/Data-preprocessing/
 
 # Create a session and S3 client
 session = boto3.session.Session()
-s3_client = session.client(
-    service_name='s3',
-    aws_access_key_id=access_key,
-    aws_secret_access_key=secret_key,
+s3_client = session.client(service_name='s3',
+    aws_access_key_id=s3_access_key_id,
+    aws_secret_access_key=s3_secret_access_key,
 )
 
 # List objects in the specific bucket
@@ -40,55 +56,60 @@ else:
 
 
 
-#Création d'un répertoire local pour chaque dossier contenu dans S3
+#Download the files from S3
 if 'Contents' in response:
     for obj in response['Contents']:
         key = obj['Key']
         print(f"Processing: {key}")
         
-        # Créez les répertoires nécessaires localement
-        if '/' in key:  # Si le chemin contient un "/", cela indique un dossier ou un chemin structuré
-            local_path = os.path.dirname(key)  # Récupérer le chemin du répertoire
+        #Create folders
+        if '/' in key:  
+            local_path = os.path.dirname(key)  
             if not os.path.exists(local_path):
-                os.makedirs(local_path)  # Crée les dossiers si nécessaire
+                os.makedirs(local_path)  
         
-        # Télécharge uniquement si ce n'est pas un "dossier" (c'est-à-dire si Key ne se termine pas par "/")
+        # Download only files
         if not key.endswith('/'):
             s3_client.download_file(bucket_name, key, key)
 else:
     print("Bucket is empty.")
 
+
+#Defining functions to be used later
+
 def upload_to_s3(folder, file_name):
     """
-    Sauvegarde un document un dossier spécifique d'un bucket S3.
+    Upload a document to S3 bucket
 
     Args:
-        folder (str): Le nom du dossier dans lequel enregistrer le document.
-        file_name (str): Le nom du fichier à enregistrer.
+        folder (str): folder name
+        file_name (str): file name
     """
 
+    #For pictures from matplotlib, works also if not a picture
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)  # Remettre le pointeur du buffer au début
 
     try:
         s3_client.upload_fileobj(buffer, bucket_name, f"{folder}/{file_name}")
-        print(f"Le graphique a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
+        print(f"Le document a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
     except Exception as e:
         print(f"Une erreur s'est produite lors du chargement : {e}")
 
     buffer.close()
 
 
-
 #PARTIE 2 : Analyse exploratoire
 
 
 
-print("\nRésumé statistique des vols :")
-print(JFK_2017.describe())
-print("\nRésumé statistique de la météo :")
-print(weather_2017.describe())
+plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.xlsx')
+
+
+print("\nRésumé statistique des vols et de la météo :")
+print(plane_weather.describe())
+
 
 # Retards moyens par mois
 JFK_2017['Month'] = JFK_2017['FL_DATE'].dt.month
