@@ -143,19 +143,19 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
 
 #Chargement "local" pour visualisation rapide
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Retards_moyens.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Retards_moyens.png')
 #Chargement le fichier vers S3 et enregistrement le graphique dans un buffer en mémoire
 upload_to_s3("Pictures", "Retards_moyens.png")
 
 # Distribution des retards au départ
 plt.figure(figsize=(10, 6))
-sns.histplot(plane_weather['DEP_DELAY_NEW'], bins=50, kde=True, color='blue', edgecolor='black')
+sns.histplot(plane_weather['DEP_DELAY'], bins=50, kde=True, color='blue', edgecolor='black')
 plt.title("Distribution des retards au départ", fontsize=16)
 plt.xlabel("Retard au départ (minutes)", fontsize=12)
 plt.ylabel("Nombre de vols", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Distrib_retard_départ.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Distrib_retard_départ.png')
 upload_to_s3("Pictures", "Distrib_retard_départ.png")
 
 # Distribution des retards dus aux conditions météorologiques
@@ -166,7 +166,7 @@ plt.xlabel("Retard dû à la météo (minutes)", fontsize=12)
 plt.ylabel("Nombre de vols", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Distrib_retard_météo.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Distrib_retard_météo.png')
 upload_to_s3("Pictures", "Distrib_retard_météo.png")
 
 # Moyenne des retards dus aux conditions météorologiques par mois
@@ -180,7 +180,7 @@ plt.xlabel("Mois", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Retard_météo_moyen.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Retard_météo_moyen.png')
 upload_to_s3("Pictures", "Retard_météo_moyen.png")
 
 # Pourcentage de vols annulés
@@ -196,7 +196,7 @@ plt.ylabel("Pourcentage", fontsize=12)
 plt.xlabel("Annulé (0 = Non, 1 = Oui)", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Vols_annulés.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Vols_annulés.png')
 upload_to_s3("Pictures", "Vols_annulés.png")
 
 #Conclusion de l'analyse exploratoire
