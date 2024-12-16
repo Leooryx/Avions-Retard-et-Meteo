@@ -105,6 +105,9 @@ def upload_to_s3(folder, file_name):
 #PARTIE 2 : Analyse exploratoire
 
 
+#STEP 1: Exploring the plane and weather datasets
+
+
 #weather_2017 = pd.read_csv('Pre-Processed_data/weather_2017.csv')
 #plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.csv') #problem of encoding
 #TODO problem of encoding when i try to read files directly from S3
@@ -185,22 +188,7 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/picture
 #upload_to_s3("Pictures", "4_Retard_météo_moyen.png")
 
 
-
-# Visualisation des vols annulés \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-'''cancelled_counts = plane_weather['CANCELLED'].value_counts(normalize=True) * 100
-plt.figure(figsize=(8, 6))
-cancelled_counts.plot(kind='bar', color=['green', 'red'], alpha=0.8, edgecolor='black')
-plt.title("Pourcentage de vols annulés", fontsize=16)
-plt.ylabel("Pourcentage", fontsize=12)
-plt.xlabel("Annulé (0 = Non, 1 = Oui)", fontsize=12)
-plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Vols_annulés.png')
-upload_to_s3("Pictures", "5_Vols_annulés.png")'''
-
-
-
-
+#Proportions of delays
 # Calculate the ratio of delays explained by CARRIER_DELAY, WEATHER_DELAY, and unexplained delays
 plane_weather['carrier_delay_ratio'] = plane_weather['CARRIER_DELAY'] / plane_weather['DEP_DELAY']
 plane_weather['weather_delay_ratio'] = plane_weather['WEATHER_DELAY'] / plane_weather['DEP_DELAY']
@@ -211,47 +199,24 @@ mean_carrier_delay = plane_weather['carrier_delay_ratio'].mean()
 mean_weather_delay = plane_weather['weather_delay_ratio'].mean()
 mean_unexplained_delay = plane_weather['unexplained_delay_ratio'].mean()
 
-# Prepare data for pie chart
 sizes = [mean_carrier_delay, mean_weather_delay, mean_unexplained_delay]
 labels = ['Carrier Delay', 'Weather Delay', 'Unexplained Delay']
 colors = ['orange', 'blue', 'gray']
 
-# Create pie chart
 plt.figure(figsize=(11, 7))
 wedges, texts = plt.pie(sizes, colors=colors, startangle=90, wedgeprops={'edgecolor': 'black'}, labels=None)
-
-# Calcul des pourcentages
 percentages = [f'{size / sum(sizes) * 100:.1f}%' for size in sizes]
-
-# Créer une légende avec les pourcentages
 legend_labels = [f'{label} ({percentage})' for label, percentage in zip(labels, percentages)]
-
-# Ajouter un titre
 plt.title('Average Proportion of Delay Explanations')
-
-# Créer une légende en bas à gauche avec les pourcentages
 plt.legend(wedges, legend_labels, title="Delay Categories", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
-
-
+plt.title('Average Proportion of Delay Explanations')
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Proportions_of_delays.png')
+#upload_to_s3("Pictures", "5_Proportions_of_delay.png")
 
-#upload_to_s3("Pictures", "5_Vols_annulés.png")
+#deleting the new columns
+plane_weather = plane_weather.drop(columns=['carrier_delay_ratio', 'weather_delay_ratio', 'unexplained_delay_ratio'])
 
-
-
-
-# Add a legend at the bottom right
-
-
-# Set the title
-plt.title('Average Proportion of Delay Explanations')
-#DROP COLUMNS !!!!!!!
-
-
-
-
-'''
 
 #Weather trends for the year 2017
 plt.figure(figsize=(8.27, 11.69))  # A4 size (in inches)
@@ -323,5 +288,13 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/picture
 plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification
 
 
+#STEP 2: finding relations between the variables
+corr_matrix = plane_weather_for_ML.corr()
+plt.figure(figsize=(12, 10))
+sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.5, linecolor='black')
+ticks = np.arange(len(plane_weather_for_ML.columns))
+plt.xticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=90)
+plt.yticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=0)
+plt.title('Correlation Matrix of Variables')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/8_Corr_matrix.png', dpi=300)
 
-'''
