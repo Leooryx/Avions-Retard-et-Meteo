@@ -129,7 +129,7 @@ plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_De
 plane_weather['DATE_weather'] = pd.to_datetime(plane_weather['DATE_weather'])
 print(plane_weather.info())
 
-
+'''
 # Retards moyens par mois
 plane_weather['Month'] = plane_weather['Full_Departure_Datetime'].dt.month
 monthly_delays = plane_weather.groupby('Month')[['DEP_DELAY', 'ARR_DELAY']].mean()
@@ -243,8 +243,6 @@ ax4 = plt.subplot(4, 1, 4)
 format_subplot(ax4, plane_weather, 'Full_Departure_Datetime', 'HOURLYStationPressure', 'Pressure', 'gray', 'Pressure (in Hg)')
 plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to avoid title overlap
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/6_weather_2017_summary.png', dpi=300)
-plt.show()
-
 
 
 
@@ -274,27 +272,53 @@ for i, month in enumerate(months):
     format_subplot(ax, month_data, 'DATE_weather', ['DAILYPrecip', 'DAILYSnowDepth', 'HOURLYStationPressure', 'DAILYAverageDryBulbTemp'], labels, colors, 'Values')
     ax.set_title(f'{month}')
     
-
-# Add main title for the entire figure
 plt.suptitle('Weather Month by Month', fontsize=16, fontweight='bold')
 
-
-# Adjust the position of the legend (at the bottom horizontally)
 plt.legend(loc='center', bbox_to_anchor=(-1.2, -0.09), ncol=4)  # Légende centrée en bas
 plt.tight_layout(rect=[0, 0, 1, 0.95]) # Adjust layout for title
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/7_month_by_month.png', dpi=300)
 
-plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification
+plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification'''
+
+
 
 
 #STEP 2: finding relations between the variables
 corr_matrix = plane_weather_for_ML.corr()
-plt.figure(figsize=(12, 10))
-sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.5, linecolor='black')
+plt.figure(figsize=(13, 11))
+sns.heatmap(corr_matrix, annot=False, cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.4, linecolor='black')
 ticks = np.arange(len(plane_weather_for_ML.columns))
-plt.xticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=90)
-plt.yticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=0)
+'''plt.xticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=90)
+plt.yticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=0)'''
+
+plt.xticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=90)
+plt.yticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=0)
+
 plt.title('Correlation Matrix of Variables')
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/8_Corr_matrix.png', dpi=300)
 
+#Isolating the variables with a strong correlation
+threshold = 0.7
+strongly_correlated_pairs = []
+for i in range(len(corr_matrix.columns)):
+    for j in range(i):
+        if abs(corr_matrix.iloc[i, j]) > threshold:  # Si la corrélation est au-dessus du seuil
+            strongly_correlated_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
+
+# Afficher les paires fortement corrélées
+for pair in strongly_correlated_pairs:
+    print(f'Variables: {pair[0]} & {pair[1]}, Corrélation: {pair[2]:.2f}')
+
+
+#We remove strongly correlated variables
+variables_to_keep = [var for var in corr_matrix.columns if var not in variables_to_remove]
+print("\nVariables to keep :", variables_to_keep)
+
+# We delete the useless variables in the dataframe
+plane_weather_cleaned = plane_weather[variables_to_keep]
+
+# Afficher le DataFrame nettoyé (optionnel)
+import ace_tools as tools; tools.display_dataframe_to_user(name="Cleaned DataFrame", dataframe=plane_weather_cleaned)
+
+#looking for temporal relations
