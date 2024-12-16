@@ -60,17 +60,18 @@ else:
 if 'Contents' in response:
     for obj in response['Contents']:
         key = obj['Key']
-        print(f"Processing: {key}")
-        
-        #Create folders
-        if '/' in key:  
-            local_path = os.path.dirname(key)  
-            if not os.path.exists(local_path):
-                os.makedirs(local_path)  
-        
-        # Download only files
-        if not key.endswith('/'):
-            s3_client.download_file(bucket_name, key, key)
+        if 'Pre-Processed_data/' in key:
+            print(f"Processing: {key}")
+    
+            #Create folders
+            if '/' in key:  
+                local_path = os.path.dirname(key)  
+                if not os.path.exists(local_path):
+                    os.makedirs(local_path)  
+            
+            # Download only files
+            if not key.endswith('/'):
+                s3_client.download_file(bucket_name, key, key)
 else:
     print("Bucket is empty.")
 
@@ -103,8 +104,12 @@ def upload_to_s3(folder, file_name):
 #PARTIE 2 : Analyse exploratoire
 
 
+weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
+print(weather)
+#plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.csv')
+#plane_weather = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather.csv')
+plane_weather_ML = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather_for_ML.csv')
 
-plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.xlsx')
 
 
 print("\nRésumé statistique des vols et de la météo :")
