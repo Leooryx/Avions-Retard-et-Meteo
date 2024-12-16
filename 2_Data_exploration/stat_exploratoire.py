@@ -206,51 +206,52 @@ upload_to_s3("Pictures", "Vols_annulés.png")
 
 
 
-
-'''import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 import matplotlib.dates as mdates
 
-# Assuming the plane_weather DataFrame is already loaded
-# For demonstration purposes, let's create a mock DataFrame with similar structure
-# The actual data should be loaded from the 'plane_weather' CSV as per your setup.
-
-# Loading the plane_weather DataFrame (mock data for now)
-# plane_weather = pd.read_csv('path_to_your_data.csv')
-
-# Let's generate the necessary data and mock some data for the example:
-plane_weather = pd.DataFrame({
-    'Full_Departure_Datetime': pd.date_range(start='1/1/2017', periods=365, freq='D'),
-    'DAILYMaximumDryBulbTemp': [25 + (i % 30) for i in range(365)],
-    'DAILYMinimumDryBulbTemp': [15 + (i % 25) for i in range(365)],
-    'DAILYPrecip': [0 if i % 5 else 1 for i in range(365)],
-})
-
-# Ensuring that the Full_Departure_Datetime column is in datetime format
-plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
-
-# Create the plot
+# Crée une figure de taille A4
 plt.figure(figsize=(8.27, 11.69))  # A4 size (in inches)
+plt.suptitle('Weather Characterization Throughout 2017', fontsize=16, fontweight='bold')
 
-# 1. Plotting the characterization for the entire year of 2017
-plt.subplot(2, 1, 1)
+# Fonction pour formater les axes de chaque sous-graphique
+def format_subplot(ax, data, x_column, y_column, label, color, ylabel):
+    sns.lineplot(data=data, x=x_column, y=y_column, label=label, color=color, ax=ax)
+    ax.set_xlabel('Date')
+    ax.set_ylabel(ylabel)
+    ax.legend()
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # Display months
+    ax.xaxis.set_major_locator(mdates.MonthLocator())  # Tick every month
+    ax.tick_params(axis='x', rotation=45)  # Rotate x-axis labels
 
-# Let's plot the maximum and minimum daily temperatures over the year
-sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMaximumDryBulbTemp', label='Max Temp', color='orange')
-sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', label='Min Temp', color='blue')
+# Plot 1: Daily maximum and minimum temperatures
+ax1 = plt.subplot(4, 1, 1)
+format_subplot(ax1, plane_weather, 'Full_Departure_Datetime', 'DAILYMaximumDryBulbTemp', 'Max Temp', 'orange', 'Temperature (°F)')
+sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', label='Min Temp', color='blue', ax=ax1)
 
-plt.title('Weather Characterization Throughout 2017')
-plt.xlabel('Date')
-plt.ylabel('Temperature (°F)')
-plt.legend()
+# Plot 2: Daily Precipitation
+ax2 = plt.subplot(4, 1, 2)
+format_subplot(ax2, plane_weather, 'Full_Departure_Datetime', 'DAILYPrecip', 'Daily Precip', 'black', 'Precipitation')
 
-# Formatting x-axis for better readability
-plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # Display months
-plt.gca().xaxis.set_major_locator(mdates.MonthLocator())  # Tick every month
-plt.xticks(rotation=45)
+# Plot 3: Daily Snow Depth
+ax3 = plt.subplot(4, 1, 3)
+format_subplot(ax3, plane_weather, 'Full_Departure_Datetime', 'DAILYSnowDepth', 'Daily Snow', 'blue', 'Snow Depth')
 
-# 2. Plotting for the monthly weather characterization
+# Plot 4: Hourly Station Pressure
+ax4 = plt.subplot(4, 1, 4)
+format_subplot(ax4, plane_weather, 'Full_Departure_Datetime', 'HOURLYStationPressure', 'Pressure', 'gray', 'Pressure (in Hg)')
+
+# Ajuster les espaces et enregistrer le graphique
+plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to avoid title overlap
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_2017_summary.png', dpi=300)
+plt.show()
+
+
+
+
+
+
+'''# 2. Plotting for the monthly weather characterization
 months = plane_weather['Full_Departure_Datetime'].dt.month
 monthly_data = plane_weather.groupby(months).agg({
     'DAILYMaximumDryBulbTemp': 'mean',
@@ -270,14 +271,13 @@ plt.ylabel('Average Temperature (°F)')
 plt.legend()
 
 # Customize the plot
-plt.xticks(ticks=range(12), labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+plt.xticks(ticks=range(12), labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])'''
 
 # Save the plot as a PNG file
 plt.tight_layout()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_summary.png', dpi=300)
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_2017_summary.png', dpi=300)
 
-# Display the plot to the user
-plt.show()'''
+
 
 
 
@@ -287,57 +287,42 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Let's simulate loading the plane_weather dataset with the provided data structure.
-# We'll generate a sample dataframe from the data provided (it's a small sample, for illustration).
 
 
-
-df = plane_weather
 # Set the figure size and style for aesthetics
 plt.figure(figsize=(12, 9))
 
+# Function to format subplots
+def format_subplot(ax, data, x_column, y_columns, labels, colors, ylabel):
+    for y_col, label, color in zip(y_columns, labels, colors):
+        sns.lineplot(data=data, x=x_column, y=y_col, label=label, color=color, ax=ax, linewidth=1)
+    ax.set_ylabel(ylabel)
+    ax.legend(False)
+    ax.set_xticklabels([])  # Hide x-axis labels
 
-# Create the main plot for 2017 weather trends (for simplicity, we use random values for now)
-#plt.subplot(2, 1, 1)
-'''
-plt.plot(df['DATE_weather'], df['HOURLYWindSpeed'], label='Hourly Wind Speed', color='red', linewidth=1)
-plt.plot(df['DATE_weather'], df['HOURLYPrecip'], label='Hourly Precipitation', color='green', linewidth=1)
-plt.plot(df['DATE_weather'], df['DAILYSnowDepth'], label='DAILYSnowDepth', color='blue', linewidth=1)
-plt.plot(df['DATE_weather'], df['HOURLYStationPressure'], label='HOURLYStationPressure', color='grey', linewidth=1)
-plt.plot(df['DATE_weather'], df['HOURLYVISIBILITY'], label='HOURLYVISIBILITY', color='brown', linewidth=1)
-plt.plot(df['DATE_weather'], df['HOURLYDRYBULBTEMPF'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
-
-
-plt.xlabel('Date')
-plt.ylabel('Values')
-plt.title('Yearly Weather Trends (2017)')
-plt.legend()'''
-
-
+# List of months and corresponding colors
 months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+colors = ['green', 'blue', 'grey', 'black']
+labels = ['Hourly Precipitation * 10', 'Daily Snow Depth', 'Hourly Station Pressure', 'Average Dry Bulb Temp']
 
-# Create the monthly subplots (simplified for illustration with sample data)
+# Loop over each month to create the subplots
 for i, month in enumerate(months):
-    month_data = df[df['DATE_weather'].dt.month == i + 1]
-    plt.subplot(3, 4, i+1)
-    #plt.plot(month_data['DATE_weather'], month_data['DAILYWindSpeed'], label='Hourly Wind Speed', color='red', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['DAILYPrecip']*10, label='Hourly Precipitation*10', color='green', linewidth=1) #*10 for more visibility
-    plt.plot(month_data['DATE_weather'], month_data['DAILYSnowDepth'], label='DAILYSnowDepth', color='blue', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['HOURLYStationPressure'], label='HOURLYStationPressure', color='grey', linewidth=1) #hourly beause the evolutions are smooth
-    #plt.plot(month_data['DATE_weather'], month_data['DAILYVISIBILITY'], label='HOURLYVISIBILITY', color='brown', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['DAILYAverageDryBulbTemp'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
-    
-    plt.title(f'{month}')
-    #plt.xlabel('Date')
-    plt.ylabel('Values')
-    #plt.xticks()
-    
+    month_data = plane_weather[plane_weather['DATE_weather'].dt.month == i + 1]
+    ax = plt.subplot(3, 4, i+1)
+    format_subplot(ax, month_data, 'DATE_weather', ['DAILYPrecip', 'DAILYSnowDepth', 'HOURLYStationPressure', 'DAILYAverageDryBulbTemp'], labels, colors, 'Values')
+    ax.set_title(f'{month}')
 
-    plt.tight_layout()
+# Add main title for the entire figure
+plt.suptitle('Weather Month by Month', fontsize=16, fontweight='bold')
 
-plt.legend()
-# Saving the figure to a PNG file
-plt.tight_layout()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_summary.png', dpi=300)
+# Adjust the layout to avoid overlap and place the legend horizontally at the bottom
+plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout for title
+
+# Adjust the position of the legend (at the bottom horizontally)
+plt.legend(loc='center', bbox_to_anchor=(-0.5, -0.1), ncol=4)
+
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/month_by_month.png', dpi=300)
+
+
 
 
