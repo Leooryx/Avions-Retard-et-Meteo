@@ -20,8 +20,9 @@ import os
 import numpy as np
 from datetime import timedelta
 import seaborn as sns
+import matplotlib.dates as mdates
 
-#Opening and reading the .env file
+'''#Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
     for line in f:
         line = line.strip()
@@ -98,7 +99,7 @@ def upload_to_s3(folder, file_name):
     except Exception as e:
         print(f"Une erreur s'est produite lors du chargement : {e}")
 
-    buffer.close()
+    buffer.close()'''
 
 
 #PARTIE 2 : Analyse exploratoire
@@ -143,9 +144,9 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
 
 #Chargement "local" pour visualisation rapide
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Retards_moyens.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/1_Retards_moyens.png')
 #Chargement le fichier vers S3 et enregistrement le graphique dans un buffer en mémoire
-upload_to_s3("Pictures", "Retards_moyens.png")
+#upload_to_s3("Pictures", "1_Retards_moyens.png")
 
 # Distribution des retards au départ
 plt.figure(figsize=(10, 6))
@@ -155,8 +156,8 @@ plt.xlabel("Retard au départ (minutes)", fontsize=12)
 plt.ylabel("Nombre de vols", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Distrib_retard_départ.png')
-upload_to_s3("Pictures", "Distrib_retard_départ.png")
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/2_Distrib_retard_départ.png')
+#upload_to_s3("Pictures", "2_Distrib_retard_départ.png")
 
 # Distribution des retards dus aux conditions météorologiques
 plt.figure(figsize=(10, 6))
@@ -166,8 +167,8 @@ plt.xlabel("Retard dû à la météo (minutes)", fontsize=12)
 plt.ylabel("Nombre de vols", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Distrib_retard_météo.png')
-upload_to_s3("Pictures", "Distrib_retard_météo.png")
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/3_Distrib_retard_météo.png')
+#upload_to_s3("Pictures", "3_Distrib_retard_météo.png")
 
 # Moyenne des retards dus aux conditions météorologiques par mois
 weather_delay_monthly = plane_weather.groupby('Month')['WEATHER_DELAY'].mean()
@@ -180,15 +181,13 @@ plt.xlabel("Mois", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Retard_météo_moyen.png')
-upload_to_s3("Pictures", "Retard_météo_moyen.png")
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_Retard_météo_moyen.png')
+#upload_to_s3("Pictures", "4_Retard_météo_moyen.png")
 
-# Pourcentage de vols annulés
-cancelled_percentage = plane_weather['CANCELLED'].mean() * 100
-print(f"Pourcentage de vols annulés : {cancelled_percentage:.2f}%")
 
-# Visualisation des vols annulés
-cancelled_counts = plane_weather['CANCELLED'].value_counts(normalize=True) * 100
+
+# Visualisation des vols annulés \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+'''cancelled_counts = plane_weather['CANCELLED'].value_counts(normalize=True) * 100
 plt.figure(figsize=(8, 6))
 cancelled_counts.plot(kind='bar', color=['green', 'red'], alpha=0.8, edgecolor='black')
 plt.title("Pourcentage de vols annulés", fontsize=16)
@@ -196,21 +195,65 @@ plt.ylabel("Pourcentage", fontsize=12)
 plt.xlabel("Annulé (0 = Non, 1 = Oui)", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/Vols_annulés.png')
-upload_to_s3("Pictures", "Vols_annulés.png")
-
-#Conclusion de l'analyse exploratoire
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Vols_annulés.png')
+upload_to_s3("Pictures", "5_Vols_annulés.png")'''
 
 
 
 
+# Calculate the ratio of delays explained by CARRIER_DELAY, WEATHER_DELAY, and unexplained delays
+plane_weather['carrier_delay_ratio'] = plane_weather['CARRIER_DELAY'] / plane_weather['DEP_DELAY']
+plane_weather['weather_delay_ratio'] = plane_weather['WEATHER_DELAY'] / plane_weather['DEP_DELAY']
+plane_weather['unexplained_delay_ratio'] = 1 - (plane_weather['carrier_delay_ratio'] + plane_weather['weather_delay_ratio'])
+
+# Calculate the mean proportion of each type of delay
+mean_carrier_delay = plane_weather['carrier_delay_ratio'].mean()
+mean_weather_delay = plane_weather['weather_delay_ratio'].mean()
+mean_unexplained_delay = plane_weather['unexplained_delay_ratio'].mean()
+
+# Prepare data for pie chart
+sizes = [mean_carrier_delay, mean_weather_delay, mean_unexplained_delay]
+labels = ['Carrier Delay', 'Weather Delay', 'Unexplained Delay']
+colors = ['orange', 'blue', 'gray']
+
+# Create pie chart
+plt.figure(figsize=(11, 7))
+wedges, texts = plt.pie(sizes, colors=colors, startangle=90, wedgeprops={'edgecolor': 'black'}, labels=None)
+
+# Calcul des pourcentages
+percentages = [f'{size / sum(sizes) * 100:.1f}%' for size in sizes]
+
+# Créer une légende avec les pourcentages
+legend_labels = [f'{label} ({percentage})' for label, percentage in zip(labels, percentages)]
+
+# Ajouter un titre
+plt.title('Average Proportion of Delay Explanations')
+
+# Créer une légende en bas à gauche avec les pourcentages
+plt.legend(wedges, legend_labels, title="Delay Categories", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
 
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import matplotlib.dates as mdates
 
-# Crée une figure de taille A4
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Proportions_of_delays.png')
+
+#upload_to_s3("Pictures", "5_Vols_annulés.png")
+
+
+
+
+# Add a legend at the bottom right
+
+
+# Set the title
+plt.title('Average Proportion of Delay Explanations')
+#DROP COLUMNS !!!!!!!
+
+
+
+
+'''
+
+#Weather trends for the year 2017
 plt.figure(figsize=(8.27, 11.69))  # A4 size (in inches)
 plt.suptitle('Weather Characterization Throughout 2017', fontsize=16, fontweight='bold')
 
@@ -224,71 +267,23 @@ def format_subplot(ax, data, x_column, y_column, label, color, ylabel):
     ax.xaxis.set_major_locator(mdates.MonthLocator())  # Tick every month
     ax.tick_params(axis='x', rotation=45)  # Rotate x-axis labels
 
-# Plot 1: Daily maximum and minimum temperatures
 ax1 = plt.subplot(4, 1, 1)
 format_subplot(ax1, plane_weather, 'Full_Departure_Datetime', 'DAILYMaximumDryBulbTemp', 'Max Temp', 'orange', 'Temperature (°F)')
 sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', label='Min Temp', color='blue', ax=ax1)
-
-# Plot 2: Daily Precipitation
 ax2 = plt.subplot(4, 1, 2)
 format_subplot(ax2, plane_weather, 'Full_Departure_Datetime', 'DAILYPrecip', 'Daily Precip', 'black', 'Precipitation')
-
-# Plot 3: Daily Snow Depth
 ax3 = plt.subplot(4, 1, 3)
 format_subplot(ax3, plane_weather, 'Full_Departure_Datetime', 'DAILYSnowDepth', 'Daily Snow', 'blue', 'Snow Depth')
-
-# Plot 4: Hourly Station Pressure
 ax4 = plt.subplot(4, 1, 4)
 format_subplot(ax4, plane_weather, 'Full_Departure_Datetime', 'HOURLYStationPressure', 'Pressure', 'gray', 'Pressure (in Hg)')
-
-# Ajuster les espaces et enregistrer le graphique
 plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to avoid title overlap
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_2017_summary.png', dpi=300)
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/6_weather_2017_summary.png', dpi=300)
 plt.show()
 
 
 
 
-
-
-'''# 2. Plotting for the monthly weather characterization
-months = plane_weather['Full_Departure_Datetime'].dt.month
-monthly_data = plane_weather.groupby(months).agg({
-    'DAILYMaximumDryBulbTemp': 'mean',
-    'DAILYMinimumDryBulbTemp': 'mean',
-    'DAILYPrecip': 'mean',
-}).reset_index()
-
-plt.subplot(2, 1, 2)
-
-# Monthly average temperatures and precipitation
-sns.barplot(data=monthly_data, x='Full_Departure_Datetime', y='DAILYMaximumDryBulbTemp', color='orange', label='Max Temp')
-sns.barplot(data=monthly_data, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', color='blue', label='Min Temp')
-
-plt.title('Monthly Weather Summary')
-plt.xlabel('Month')
-plt.ylabel('Average Temperature (°F)')
-plt.legend()
-
-# Customize the plot
-plt.xticks(ticks=range(12), labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])'''
-
-# Save the plot as a PNG file
-plt.tight_layout()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_2017_summary.png', dpi=300)
-
-
-
-
-
-
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-
-
+#Plot month by month weather
 # Set the figure size and style for aesthetics
 plt.figure(figsize=(12, 9))
 
@@ -296,10 +291,12 @@ plt.figure(figsize=(12, 9))
 def format_subplot(ax, data, x_column, y_columns, labels, colors, ylabel):
     for y_col, label, color in zip(y_columns, labels, colors):
         sns.lineplot(data=data, x=x_column, y=y_col, label=label, color=color, ax=ax, linewidth=1)
-    ax.set_ylabel(ylabel)
-    ax.legend(False)
-    ax.set_xticklabels([])  # Hide x-axis labels
+    ax.set_ylabel(ylabel).set_visible(False)
+    ax.legend().set_visible(False)
+    ax.set_xlabel('')  # Delete x-axis label
+    ax.xaxis.set_ticks([])  # Hide x-axis ticks
 
+plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']*10 #to show it more visibly on the graph
 # List of months and corresponding colors
 months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 colors = ['green', 'blue', 'grey', 'black']
@@ -311,18 +308,20 @@ for i, month in enumerate(months):
     ax = plt.subplot(3, 4, i+1)
     format_subplot(ax, month_data, 'DATE_weather', ['DAILYPrecip', 'DAILYSnowDepth', 'HOURLYStationPressure', 'DAILYAverageDryBulbTemp'], labels, colors, 'Values')
     ax.set_title(f'{month}')
+    
 
 # Add main title for the entire figure
 plt.suptitle('Weather Month by Month', fontsize=16, fontweight='bold')
 
-# Adjust the layout to avoid overlap and place the legend horizontally at the bottom
-plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout for title
 
 # Adjust the position of the legend (at the bottom horizontally)
-plt.legend(loc='center', bbox_to_anchor=(-0.5, -0.1), ncol=4)
+plt.legend(loc='center', bbox_to_anchor=(-1.2, -0.09), ncol=4)  # Légende centrée en bas
+plt.tight_layout(rect=[0, 0, 1, 0.95]) # Adjust layout for title
 
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/month_by_month.png', dpi=300)
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/7_month_by_month.png', dpi=300)
+
+plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification
 
 
 
-
+'''
