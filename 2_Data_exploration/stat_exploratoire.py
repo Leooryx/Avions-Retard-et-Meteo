@@ -200,3 +200,144 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/picture
 upload_to_s3("Pictures", "Vols_annulés.png")
 
 #Conclusion de l'analyse exploratoire
+
+
+
+
+
+
+
+'''import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+# Assuming the plane_weather DataFrame is already loaded
+# For demonstration purposes, let's create a mock DataFrame with similar structure
+# The actual data should be loaded from the 'plane_weather' CSV as per your setup.
+
+# Loading the plane_weather DataFrame (mock data for now)
+# plane_weather = pd.read_csv('path_to_your_data.csv')
+
+# Let's generate the necessary data and mock some data for the example:
+plane_weather = pd.DataFrame({
+    'Full_Departure_Datetime': pd.date_range(start='1/1/2017', periods=365, freq='D'),
+    'DAILYMaximumDryBulbTemp': [25 + (i % 30) for i in range(365)],
+    'DAILYMinimumDryBulbTemp': [15 + (i % 25) for i in range(365)],
+    'DAILYPrecip': [0 if i % 5 else 1 for i in range(365)],
+})
+
+# Ensuring that the Full_Departure_Datetime column is in datetime format
+plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
+
+# Create the plot
+plt.figure(figsize=(8.27, 11.69))  # A4 size (in inches)
+
+# 1. Plotting the characterization for the entire year of 2017
+plt.subplot(2, 1, 1)
+
+# Let's plot the maximum and minimum daily temperatures over the year
+sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMaximumDryBulbTemp', label='Max Temp', color='orange')
+sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', label='Min Temp', color='blue')
+
+plt.title('Weather Characterization Throughout 2017')
+plt.xlabel('Date')
+plt.ylabel('Temperature (°F)')
+plt.legend()
+
+# Formatting x-axis for better readability
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # Display months
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator())  # Tick every month
+plt.xticks(rotation=45)
+
+# 2. Plotting for the monthly weather characterization
+months = plane_weather['Full_Departure_Datetime'].dt.month
+monthly_data = plane_weather.groupby(months).agg({
+    'DAILYMaximumDryBulbTemp': 'mean',
+    'DAILYMinimumDryBulbTemp': 'mean',
+    'DAILYPrecip': 'mean',
+}).reset_index()
+
+plt.subplot(2, 1, 2)
+
+# Monthly average temperatures and precipitation
+sns.barplot(data=monthly_data, x='Full_Departure_Datetime', y='DAILYMaximumDryBulbTemp', color='orange', label='Max Temp')
+sns.barplot(data=monthly_data, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', color='blue', label='Min Temp')
+
+plt.title('Monthly Weather Summary')
+plt.xlabel('Month')
+plt.ylabel('Average Temperature (°F)')
+plt.legend()
+
+# Customize the plot
+plt.xticks(ticks=range(12), labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+
+# Save the plot as a PNG file
+plt.tight_layout()
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_summary.png', dpi=300)
+
+# Display the plot to the user
+plt.show()'''
+
+
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Let's simulate loading the plane_weather dataset with the provided data structure.
+# We'll generate a sample dataframe from the data provided (it's a small sample, for illustration).
+
+
+
+df = plane_weather
+# Set the figure size and style for aesthetics
+plt.figure(figsize=(12, 9))
+
+
+# Create the main plot for 2017 weather trends (for simplicity, we use random values for now)
+#plt.subplot(2, 1, 1)
+'''
+plt.plot(df['DATE_weather'], df['HOURLYWindSpeed'], label='Hourly Wind Speed', color='red', linewidth=1)
+plt.plot(df['DATE_weather'], df['HOURLYPrecip'], label='Hourly Precipitation', color='green', linewidth=1)
+plt.plot(df['DATE_weather'], df['DAILYSnowDepth'], label='DAILYSnowDepth', color='blue', linewidth=1)
+plt.plot(df['DATE_weather'], df['HOURLYStationPressure'], label='HOURLYStationPressure', color='grey', linewidth=1)
+plt.plot(df['DATE_weather'], df['HOURLYVISIBILITY'], label='HOURLYVISIBILITY', color='brown', linewidth=1)
+plt.plot(df['DATE_weather'], df['HOURLYDRYBULBTEMPF'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
+
+
+plt.xlabel('Date')
+plt.ylabel('Values')
+plt.title('Yearly Weather Trends (2017)')
+plt.legend()'''
+
+
+months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+# Create the monthly subplots (simplified for illustration with sample data)
+for i, month in enumerate(months):
+    month_data = df[df['DATE_weather'].dt.month == i + 1]
+    plt.subplot(3, 4, i+1)
+    plt.plot(month_data['DATE_weather'], month_data['HOURLYWindSpeed'], label='Hourly Wind Speed', color='red', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['HOURLYPrecip'], label='Hourly Precipitation', color='green', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['DAILYSnowDepth'], label='DAILYSnowDepth', color='blue', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['HOURLYStationPressure'], label='HOURLYStationPressure', color='grey', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['HOURLYVISIBILITY'], label='HOURLYVISIBILITY', color='brown', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['HOURLYDRYBULBTEMPF'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
+    
+    plt.title(f'{month}')
+    plt.xlabel('Date')
+    plt.ylabel('Values')
+    plt.xticks()
+    
+
+    plt.tight_layout()
+
+plt.legend()
+# Saving the figure to a PNG file
+plt.tight_layout()
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/weather_summary.png', dpi=300)
+
+
