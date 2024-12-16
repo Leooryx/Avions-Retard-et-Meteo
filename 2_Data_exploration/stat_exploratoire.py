@@ -104,16 +104,20 @@ def upload_to_s3(folder, file_name):
 #PARTIE 2 : Analyse exploratoire
 
 
-weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
-print(weather)
-#plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.csv')
-#plane_weather = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather.csv')
-plane_weather_ML = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather_for_ML.csv', encoding='utf-16')
+#weather_2017 = pd.read_csv('Pre-Processed_data/weather_2017.csv')
+#plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.csv') #problem of encoding
+#TODO problem of encoding when i try to read files directly from S3
 
 
+
+plane_weather = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.csv')
+plane_weather_for_ML = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv')
+JFK_numbers = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.csv')
+weather_2017 = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.csv')
 
 print("\nRésumé statistique des vols et de la météo :")
-print(plane_weather.describe())
+plane_weather.describe().to_csv('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv')
+#est-ce que je peux en faire une image ?
 
 
 # Retards moyens par mois
