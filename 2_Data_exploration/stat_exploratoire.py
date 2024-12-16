@@ -328,9 +328,9 @@ for i, month in enumerate(months):
     plt.plot(month_data['DATE_weather'], month_data['HOURLYDRYBULBTEMPF'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
     
     plt.title(f'{month}')
-    plt.xlabel('Date')
+    #plt.xlabel('Date')
     plt.ylabel('Values')
-    plt.xticks()
+    #plt.xticks()
     
 
     plt.tight_layout()
