@@ -320,12 +320,12 @@ months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'Augus
 for i, month in enumerate(months):
     month_data = df[df['DATE_weather'].dt.month == i + 1]
     plt.subplot(3, 4, i+1)
-    plt.plot(month_data['DATE_weather'], month_data['HOURLYWindSpeed'], label='Hourly Wind Speed', color='red', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['HOURLYPrecip'], label='Hourly Precipitation', color='green', linewidth=1)
+    #plt.plot(month_data['DATE_weather'], month_data['DAILYWindSpeed'], label='Hourly Wind Speed', color='red', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['DAILYPrecip']*10, label='Hourly Precipitation*10', color='green', linewidth=1) #*10 for more visibility
     plt.plot(month_data['DATE_weather'], month_data['DAILYSnowDepth'], label='DAILYSnowDepth', color='blue', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['HOURLYStationPressure'], label='HOURLYStationPressure', color='grey', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['HOURLYVISIBILITY'], label='HOURLYVISIBILITY', color='brown', linewidth=1)
-    plt.plot(month_data['DATE_weather'], month_data['HOURLYDRYBULBTEMPF'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['HOURLYStationPressure'], label='HOURLYStationPressure', color='grey', linewidth=1) #hourly beause the evolutions are smooth
+    #plt.plot(month_data['DATE_weather'], month_data['DAILYVISIBILITY'], label='HOURLYVISIBILITY', color='brown', linewidth=1)
+    plt.plot(month_data['DATE_weather'], month_data['DAILYAverageDryBulbTemp'], label='HOURLYDRYBULBTEMPF', color='black', linewidth=1)
     
     plt.title(f'{month}')
     #plt.xlabel('Date')
