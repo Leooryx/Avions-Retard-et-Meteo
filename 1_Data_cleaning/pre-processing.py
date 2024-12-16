@@ -135,6 +135,8 @@ june_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_june.csv')[lambda 
 print(len(june_JFK)) #134
 july_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_july.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(july_JFK)) #192
+august_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_august.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+print(len(august_JFK)) #180
 september_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_september.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(september_JFK)) #206
 october_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_october.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
@@ -143,8 +145,8 @@ november_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_november.csv')
 print(len(november_JFK)) #220
 december_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_december.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(december_JFK)) #168
-#Total size = 1958
-year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
+#Total size = 2138
+year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, august_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
 JFK_2017 = pd.concat(year, ignore_index=True)
 #print(len(JFK_2017))
 
