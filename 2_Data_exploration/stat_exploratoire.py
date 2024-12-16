@@ -301,10 +301,12 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/picture
 #Isolating the variables with a strong correlation
 threshold = 0.7
 strongly_correlated_pairs = []
+variables_to_remove = set()
 for i in range(len(corr_matrix.columns)):
     for j in range(i):
         if abs(corr_matrix.iloc[i, j]) > threshold:  # Si la corrélation est au-dessus du seuil
             strongly_correlated_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
+            variables_to_remove.add(corr_matrix.columns[j])
 
 # Afficher les paires fortement corrélées
 for pair in strongly_correlated_pairs:
@@ -312,13 +314,67 @@ for pair in strongly_correlated_pairs:
 
 
 #We remove strongly correlated variables
+
 variables_to_keep = [var for var in corr_matrix.columns if var not in variables_to_remove]
+variables_to_keep.append('DEP_DELAY') #we keep DEP_DELAY because this is the variable with the most information about delays
 print("\nVariables to keep :", variables_to_keep)
 
 # We delete the useless variables in the dataframe
-plane_weather_cleaned = plane_weather[variables_to_keep]
+plane_weather_no_corr = plane_weather[variables_to_keep]
+print(plane_weather_no_corr) #18 variables
 
-# Afficher le DataFrame nettoyé (optionnel)
-import ace_tools as tools; tools.display_dataframe_to_user(name="Cleaned DataFrame", dataframe=plane_weather_cleaned)
 
-#looking for temporal relations
+#looking for temporal relations --> machine learning / time series
+plane_weather_reduced = pd.concat([plane_weather[['Full_Departure_Datetime']], plane_weather_no_corr], axis=1)
+print(plane_weather_reduced.info())
+
+
+
+#Scatter plots:
+n_vars = 18
+n_pairs = n_vars * (n_vars - 1) // 2  
+
+# Calculations for the grid
+n_cols = 12
+n_rows = int(np.ceil(n_pairs / n_cols))  # Number of rows necessary
+
+fig, axes = plt.subplots(n_rows, n_cols, figsize=(25, 25))  
+
+# Flaten to ease indexation
+axes = axes.flatten()
+
+# counter for axes index
+ax_idx = 0
+
+# Parcourir toutes les paires de variables
+for i in range(n_vars):
+    for j in range(i):  # Afficher uniquement sous la diagonale
+        sns.scatterplot(x=plane_weather_no_corr.iloc[:, i], 
+                        y=plane_weather_no_corr.iloc[:, j], 
+                        ax=axes[ax_idx], 
+                        color='blue', s=5)  # s définit la taille des points
+        axes[ax_idx].set_xlabel(plane_weather_no_corr.columns[i], fontsize=8)
+        axes[ax_idx].set_ylabel(plane_weather_no_corr.columns[j], fontsize=8)
+        axes[ax_idx].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+        axes[ax_idx].tick_params(axis='y', which='both', left=False, right=False, labelleft=False) #delete values for the axis, we just want the name of the variable
+
+        # Supprimer les ticks
+        axes[ax_idx].tick_params(axis='both', which='both', length=0)
+        
+        # Passer au prochain graphique
+        ax_idx += 1
+
+# Masquer les axes vides (si il y a des graphiques en trop dans la grille)
+for i in range(ax_idx, len(axes)):
+    axes[i].axis('off')
+
+# Ajuster l'espacement entre les graphiques pour un affichage plus propre
+plt.tight_layout()
+
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/9_Scatter_plot.png', dpi=300)
+
+
+
+
+
+
