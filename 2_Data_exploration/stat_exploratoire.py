@@ -19,7 +19,7 @@ import io
 import os
 import numpy as np
 from datetime import timedelta
-
+import seaborn as sns
 
 #Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
@@ -118,11 +118,17 @@ weather_2017 = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_clea
 print("\nRésumé statistique des vols et de la météo :")
 plane_weather.describe().to_csv('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv')
 #est-ce que je peux en faire une image ?
+#TODO : comment rendre la lisibilité meilleure ?
+
+
+plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
+plane_weather['DATE_weather'] = pd.to_datetime(plane_weather['DATE_weather'])
+print(plane_weather.info())
 
 
 # Retards moyens par mois
-JFK_2017['Month'] = JFK_2017['FL_DATE'].dt.month
-monthly_delays = JFK_2017.groupby('Month')[['DEP_DELAY_NEW', 'ARR_DELAY_NEW']].mean()
+plane_weather['Month'] = plane_weather['Full_Departure_Datetime'].dt.month
+monthly_delays = plane_weather.groupby('Month')[['DEP_DELAY', 'ARR_DELAY']].mean()
 
 # Visualisation des retards moyens par mois
 file_name = 'Retards_moyens.png'
@@ -143,7 +149,7 @@ upload_to_s3("Pictures", "Retards_moyens.png")
 
 # Distribution des retards au départ
 plt.figure(figsize=(10, 6))
-sns.histplot(JFK_2017['DEP_DELAY_NEW'], bins=50, kde=True, color='blue', edgecolor='black')
+sns.histplot(plane_weather['DEP_DELAY_NEW'], bins=50, kde=True, color='blue', edgecolor='black')
 plt.title("Distribution des retards au départ", fontsize=16)
 plt.xlabel("Retard au départ (minutes)", fontsize=12)
 plt.ylabel("Nombre de vols", fontsize=12)
@@ -154,7 +160,7 @@ upload_to_s3("Pictures", "Distrib_retard_départ.png")
 
 # Distribution des retards dus aux conditions météorologiques
 plt.figure(figsize=(10, 6))
-sns.histplot(JFK_2017['WEATHER_DELAY'], bins=50, kde=True, color='orange', edgecolor='black')
+sns.histplot(plane_weather['WEATHER_DELAY'], bins=50, kde=True, color='orange', edgecolor='black')
 plt.title("Distribution des retards dus aux conditions météorologiques", fontsize=16)
 plt.xlabel("Retard dû à la météo (minutes)", fontsize=12)
 plt.ylabel("Nombre de vols", fontsize=12)
@@ -164,7 +170,7 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Dis
 upload_to_s3("Pictures", "Distrib_retard_météo.png")
 
 # Moyenne des retards dus aux conditions météorologiques par mois
-weather_delay_monthly = JFK_2017.groupby('Month')['WEATHER_DELAY'].mean()
+weather_delay_monthly = plane_weather.groupby('Month')['WEATHER_DELAY'].mean()
 
 plt.figure(figsize=(10, 6))
 weather_delay_monthly.plot(kind='bar', color='teal', alpha=0.8, edgecolor='black')
@@ -178,11 +184,11 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/Data_cleaning/pictures/Ret
 upload_to_s3("Pictures", "Retard_météo_moyen.png")
 
 # Pourcentage de vols annulés
-cancelled_percentage = JFK_2017['CANCELLED'].mean() * 100
+cancelled_percentage = plane_weather['CANCELLED'].mean() * 100
 print(f"Pourcentage de vols annulés : {cancelled_percentage:.2f}%")
 
 # Visualisation des vols annulés
-cancelled_counts = JFK_2017['CANCELLED'].value_counts(normalize=True) * 100
+cancelled_counts = plane_weather['CANCELLED'].value_counts(normalize=True) * 100
 plt.figure(figsize=(8, 6))
 cancelled_counts.plot(kind='bar', color=['green', 'red'], alpha=0.8, edgecolor='black')
 plt.title("Pourcentage de vols annulés", fontsize=16)
