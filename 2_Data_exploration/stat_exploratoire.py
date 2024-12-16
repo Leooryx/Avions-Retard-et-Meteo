@@ -108,7 +108,7 @@ weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
 print(weather)
 #plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.csv')
 #plane_weather = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather.csv')
-plane_weather_ML = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather_for_ML.csv')
+plane_weather_ML = pd.read_csv('/home/onyxia/work/Pre-Processed_data/plane_weather_for_ML.csv', encoding='utf-16')
 
 
 
