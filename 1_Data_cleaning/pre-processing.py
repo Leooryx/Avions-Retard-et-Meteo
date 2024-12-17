@@ -21,7 +21,11 @@ import numpy as np
 from datetime import timedelta
 
 
+'''
+
 #Opening and reading the .env file
+#JAMAIS DE CHEMIN ABSOLU !!!!!
+#Avions-Retard-et-Meteo/.env
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
     for line in f:
         line = line.strip()
@@ -335,11 +339,4 @@ check_nan_columns(merged_df)
 
 
 
-
-
-
-
-
-
-
-
+'''
