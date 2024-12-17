@@ -265,6 +265,13 @@ print(f'Total size for JFK 2017: {len(JFK_2017)} rows')'''
 
 
 
+#il faut trier pour 2017 avant
+temp_list = []
+for key in dataframes:
+    if "weather" not in key:
+        temp_list.append(dataframes[key])
+
+
 
 import s3fs
 import pandas as pd
