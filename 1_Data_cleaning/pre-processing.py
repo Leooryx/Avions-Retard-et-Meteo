@@ -58,7 +58,7 @@ files_in_source = fs.ls(source_folder)
 # Dictionnaire pour stocker les DataFrames
 
 
-# Parcourir tous les fichiers du dossier source
+# Copying the dataframe from leoacpr to your s3 database
 for file_path_in_s3 in files_in_source:
     file_name = file_path_in_s3.split('/')[-1]  # Nom du fichier sans le chemin complet
 
@@ -80,7 +80,7 @@ for file_path_in_s3 in files_in_source:
 if not fs.exists(f"{YOUR_BUCKET}/diffusion/Pre-processed_data"):
     fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")
 
-#Creating the variables
+#Downloading the dataframes
 dataframes = {}
 
 for files in fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
@@ -274,15 +274,12 @@ JFK_2017_number['CANCELLED'] = JFK_2017_number['CANCELLED'].astype(int)
 print(JFK_2017_number.info())
 
 #Exporting the dataset for JFK planes
-JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.csv", index=False)
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017.csv", "w") as path:
     JFK_2017.to_csv(path)
 
-JFK_2017_no_number.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_no_number.csv", index=False)
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_no_number.csv", "w") as path:
     JFK_2017_no_number.to_csv(path)
 
-JFK_2017_number.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_number.csv", index=False)
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_number.csv", "w") as path:
     JFK_2017_number.to_csv(path)
 
@@ -359,7 +356,6 @@ weather_2017 = weather_2017.replace('T', 0)
 for col in weather_2017.columns:
     weather_2017[col] = weather_2017[col].replace(r'(\d+(\.\d+)?)([^\d\s]+)$', r'\1', regex=True)
 
-#print(weather_2017.head())
 
 # We delete columns that represents the same thing but with different units (like celsius VS Farenheit)
 # we keep Fahrenheit because some variables do not have the celsius equivalent (American weather)
@@ -367,11 +363,11 @@ Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
 weather_2017.drop(columns=Celsius, inplace=True)
 
 #We set all variables to be float, expect time
-weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astype(float)], axis=1)
+weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 2:].astype(float)], axis=1)
 
 print(weather_2017.info())
 print(weather_2017.head())
-weather_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.csv", index=False)
+
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/weather_2017.csv", "w") as path:
     weather_2017.to_csv(path)
 
@@ -381,14 +377,8 @@ with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/weather_2017.csv", "w"
 #Part 1.3: merging the two datasets
 
 
-
-
-# Convertir les colonnes de dates en format datetime
-#JFK_numbers['Full_Departure_Datetime'] = pd.to_datetime(JFK_numbers['Full_Departure_Datetime'])
-#weather_2017['DATE'] = pd.to_datetime(weather_2017['DATE'])
-
 # Conversion of data time to numpy.datetime64 type to accelerate comparisons 
-departure_times = JFK_numbers['Full_Departure_Datetime'].values.astype('datetime64[m]')  # minutes
+departure_times = JFK_2017_number['Full_Departure_Datetime'].values.astype('datetime64[m]')  # minutes
 weather_times = weather_2017['DATE'].values.astype('datetime64[m]')  # minutes
 
 #Hypothesis: the weather is the same for each 30-min interval of time
@@ -404,26 +394,28 @@ for departure_time in departure_times:
     # If the time difference is beow the tolerance, we combine the information from JFK_numbers and weather_2017
     if time_differences[closest_index] <= tolerance:
         closest_weather_row = weather_2017.iloc[closest_index]
-        jfk_row = JFK_numbers.iloc[np.where(departure_times == departure_time)[0][0]]  # find the corresponding row
+        jfk_row = JFK_2017_number.iloc[np.where(departure_times == departure_time)[0][0]]  # find the corresponding row
         merged_row = pd.concat([jfk_row, closest_weather_row], axis=0)
         merged_rows.append(merged_row)
 
 # Combining all the rows that were accepted
-merged_df = pd.DataFrame(merged_rows, columns=np.concatenate([JFK_numbers.columns, weather_2017.columns]))
+merged_df = pd.DataFrame(merged_rows, columns=np.concatenate([JFK_2017_number.columns, weather_2017.columns]))
 
 print(merged_df['Full_Departure_Datetime'])
 #only about 10 rows were lost for a tolerance of 31min: acceptable 
 
 # Uploading the data
 merged_df.rename(columns={'DATE': 'DATE_weather'}, inplace=True)
-merged_df.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.csv", index=False)
-upload_to_s3("Pre-Processed_data", "plane_weather.csv")
+with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/plane_weather.csv", "w") as path:
+    merged_df.to_csv(path)
+
+check_nan_columns(merged_df)
 print(merged_df.info())
 
 plane_weather_for_ML = merged_df.drop(columns=['Full_Departure_Datetime', 'DATE_weather'])
-plane_weather_for_ML.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv", index=False)
-upload_to_s3("Pre-Processed_data", "plane_weather_for_ML.csv")
-check_nan_columns(merged_df)
+with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/plane_weather_for_ML.csv", "w") as path:
+    merged_df.to_csv(path)
+
 
 
 
