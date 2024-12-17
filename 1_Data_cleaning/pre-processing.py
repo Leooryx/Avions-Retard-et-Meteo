@@ -80,14 +80,15 @@ for file_path_in_s3 in files_in_source:
 dataframes = {}
 
 for files in fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
-    with fs.open(file_path_in_s3, "r") as file_in:
+    with fs.open(files, "r") as file_in:
             df_imported = pd.read_csv(file_in)
+            print(f"Downloading {files}")
     # Ajouter le DataFrame dans le dictionnaire en utilisant le nom du fichier comme clé
     dataframes[f"{files.split('/')[-1]}"] = df_imported
 
 # Exemple : Accéder à un DataFrame spécifique
 # Par exemple, pour accéder au DataFrame du fichier "january.csv"
-print(dataframes['jfk_weather.csv'])
+print(dataframes['T_ONTIME_REPORTING_january.csv'])
 #ok ça marche
 
 
@@ -171,7 +172,7 @@ def upload_to_s3(folder, file_name):
     except Exception as e:
         print(f"Une erreur s'est produite lors du chargement : {e}")
 
-    buffer.close()
+    buffer.close()'''
 
 def check_nan_columns(df):
     """Checks and prints the columns containing NaN values
@@ -187,6 +188,11 @@ def check_nan_columns(df):
 
 
 
+'''#Export datasets
+df.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processing/df.csv", index=False)'''
+
+
+
 #Part 1: Cleaning data (pre-processing)
 
 #Part 1.1 : Pre-processing the planes data
@@ -195,141 +201,35 @@ def check_nan_columns(df):
 #We decide to focus on JFK airport, whose identification number is 10135
 
 #Merging the monthly datasets to obtain a dataset for 2017
-january_JFK = pd.read_csv(f'{files_in_preprocessing_data}/T_ONTIME_REPORTING_january.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+january_JFK = dataframes['T_ONTIME_REPORTING_january.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(january_JFK)) #191
-february_JFK = pd.read_csv(f'{files_in_preprocessing_data}/T_ONTIME_REPORTING_february.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+february_JFK = dataframes['T_ONTIME_REPORTING_february.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(february_JFK)) #128
-march_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_march.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+march_JFK = dataframes['T_ONTIME_REPORTING_march.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(march_JFK)) #167
-april_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_april.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+april_JFK = dataframes['T_ONTIME_REPORTING_april.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(april_JFK)) #139
-may_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_may.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+may_JFK = dataframes['T_ONTIME_REPORTING_may.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(may_JFK)) #160
-june_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_june.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+june_JFK = dataframes['T_ONTIME_REPORTING_june.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(june_JFK)) #134
-july_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_july.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+july_JFK = dataframes['T_ONTIME_REPORTING_july.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(july_JFK)) #192
-august_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_august.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+august_JFK = dataframes['T_ONTIME_REPORTING_august.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(august_JFK)) #180
-september_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_september.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+september_JFK = dataframes['T_ONTIME_REPORTING_september.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(september_JFK)) #206
-october_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_october.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+october_JFK = dataframes['T_ONTIME_REPORTING_october.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(october_JFK)) #253
-november_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_november.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+november_JFK = dataframes['T_ONTIME_REPORTING_november.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(november_JFK)) #220
-december_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_december.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+december_JFK = dataframes['T_ONTIME_REPORTING_december.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(december_JFK)) #168
 #Total size = 2138
 year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, august_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
 JFK_2017 = pd.concat(year, ignore_index=True)
 print(JFK_2017)
-#print(len(JFK_2017))'''
-
-
-
-
-
-
-
-
-
-'''files_in_preprocessing_data
-
-# Liste des mois de l'année 2017
-months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
-
-# Initialisation de la liste pour stocker les DataFrames mensuels
-year_data = []
-
-for file_path_in_s3 in files_in_source:
-    file_name = file_path_in_s3.split('/')[-1]
-# Filtrer l'ORIGIN_AIRPORT_ID de JFK (10135) et lire les fichiers mensuels
-for month in months:
-    # Construire le nom du fichier pour chaque mois
-    file_path = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
-    
-    # Lire le fichier et filtrer pour ORIGIN_AIRPORT_ID == 10135 (JFK)
-    monthly_data = pd.read_csv(file_path)[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135]
-    
-    # Afficher la taille du DataFrame mensuel
-    print(f'{month.capitalize()} JFK: {len(monthly_data)} rows')
-    
-    # Ajouter le DataFrame mensuel à la liste
-    year_data.append(monthly_data)
-
-# Concaténer tous les DataFrames mensuels dans un seul DataFrame pour 2017
-JFK_2017 = pd.concat(year_data, ignore_index=True)
-
-# Afficher la taille du DataFrame final pour 2017
-print(f'Total size for JFK 2017: {len(JFK_2017)} rows')'''
-
-
-
-#il faut trier pour 2017 avant
-temp_list = []
-for key in dataframes:
-    if "weather" not in key:
-        temp_list.append(dataframes[key])
-
-
-
-import s3fs
-import pandas as pd
-
-# Initialisation de l'accès à MinIO avec s3fs
-fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
-
-# Demander à l'utilisateur d'entrer le nom du bucket de destination
-YOUR_BUCKET = str(input("Type your bucket: \n"))
-
-# Définir le bucket source et le dossier source
-MY_BUCKET = "leoacpr/diffusion"
-source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
-
-# Liste tous les fichiers dans le dossier source
-files_in_source = fs.ls(source_folder)
-
-# Liste pour stocker les DataFrames
-all_dataframes = []
-
-# Parcourir tous les fichiers du dossier source
-for file_path_in_s3 in files_in_source:
-    # Extraire le nom du fichier pour le conserver dans le même dossier sur le bucket de destination
-    file_name = file_path_in_s3.split('/')[-1]  # Nom du fichier sans le chemin complet
-    
-    # Ouvrir et lire le fichier CSV depuis le bucket S3
-    with fs.open(file_path_in_s3, "r") as file_in:
-        df_imported = pd.read_csv(file_in)
-    
-    # Ajouter le DataFrame dans la liste
-    all_dataframes.append(df_imported)
-
-# Fusionner tous les DataFrames en un seul DataFrame
-merged_df = pd.concat(all_dataframes, ignore_index=True)
-
-# Afficher la taille du DataFrame fusionné
-print(f"Total size of the merged DataFrame: {len(merged_df)} rows")
-
-# Optionnel : Sauvegarder le DataFrame fusionné dans YOUR_BUCKET
-output_file_path = f"{YOUR_BUCKET}/diffusion/Pre-processing/merged_data.csv"
-with fs.open(output_file_path, "w") as file_out:
-    merged_df.to_csv(file_out, index=False)
-
-print(f"Merged data saved to {output_file_path}")
-
-
-
-
-
-
-'''
-
-
-
-
-
-
-
+#print(len(JFK_2017))
 
 
 #Setting the rights data types
@@ -372,11 +272,13 @@ print(JFK_numbers.info())
 
 #Exporting the dataset for JFK planes
 JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.csv", index=False)
-upload_to_s3("Pre-Processed_data", "JFK_2017.csv")
-JKF_no_number_data.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JKF_no_number_data.csv", index=False)
-upload_to_s3("Pre-Processed_data", "JKF_no_number_data.csv")
-JFK_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.csv", index=False)
-upload_to_s3("Pre-Processed_data", "JFK_numbers.csv")
+JFK_2017.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017.csv", index=False)
+JFK_2017_no_number.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_no_number.csv", index=False)
+JFK_2017_no_number.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_no_number.csv", index=False)
+JFK_2017_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_numbers.csv", index=False)
+JFK_2017_numbers.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_numbers.csv", index=False)
+
+
 
 
 #Part 1.2 : Pre-processing the weather data
@@ -516,4 +418,3 @@ check_nan_columns(merged_df)
 
 
 
-'''
