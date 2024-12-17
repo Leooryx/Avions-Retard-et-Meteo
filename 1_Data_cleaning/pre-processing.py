@@ -1,33 +1,18 @@
 #Data-preprocessing
 
 #Requirements
-
-
-#pas nécessairement utile de télécharger AMZ CLI
-#curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-#unzip awscliv2.zip
-#sudo ./aws/install
-
-#aws configure
-#keys, region and default output format (txt)
-
-#pip install boto3
-#import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
 import os
 import numpy as np
 from datetime import timedelta
+import s3fs
 
 
-
-#test without private S3
 
 #Download the files from leoacpr by typing your SSP Cloud username
 #This can take a while because the files are heavy
-
-import s3fs
 
 fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
 
@@ -38,39 +23,21 @@ files_in_source = fs.ls(source_folder)
 
 YOUR_BUCKET = str(input("Type your bucket: \n"))
 
-
 source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
 files_in_source = fs.ls(source_folder)
-
-import s3fs
-import pandas as pd
-
-# Initialiser l'accès à MinIO avec s3fs
-fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
-
-# Définir le bucket source et le dossier source
-MY_BUCKET = "leoacpr"
-source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
-
-# Liste tous les fichiers dans le dossier source
-files_in_source = fs.ls(source_folder)
-
-# Dictionnaire pour stocker les DataFrames
 
 
 # Copying the dataframe from leoacpr to your s3 database
 for file_path_in_s3 in files_in_source:
-    file_name = file_path_in_s3.split('/')[-1]  # Nom du fichier sans le chemin complet
+    file_name = file_path_in_s3.split('/')[-1]  # Name of the file without the path
 
-    # Vérifier si le fichier n'existe pas déjà dans le dossier de destination
+    # If the file already exists in your database, then it won't download it
     if fs.ls(f"{MY_BUCKET}/diffusion/Pre-processing") != fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
         file_path_for_you = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
-
-        # Importer le fichier depuis S3 dans un DataFrame
+        #import
         with fs.open(file_path_in_s3, "r") as file_in:
             df_imported = pd.read_csv(file_in)
-        
-        # Sauvegarder le fichier dans YOUR_BUCKET
+        #export
         with fs.open(file_path_for_you, "w") as file_out:
             df_imported.to_csv(file_out)
         
@@ -87,97 +54,12 @@ for files in fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
     with fs.open(files, "r") as file_in:
             df_imported = pd.read_csv(file_in)
             print(f"Downloading {files}")
-    # Ajouter le DataFrame dans le dictionnaire en utilisant le nom du fichier comme clé
+    # Dictionnary of dataframes with the name of the file as a key
     dataframes[f"{files.split('/')[-1]}"] = df_imported
 
-# Exemple : Accéder à un DataFrame spécifique
-# Par exemple, pour accéder au DataFrame du fichier "january.csv"
-print(dataframes['T_ONTIME_REPORTING_january.csv'])
-#ok ça marche
 
 
-'''
-
-#Opening and reading the .env file
-#JAMAIS DE CHEMIN ABSOLU !!!!!
-#Avions-Retard-et-Meteo/.env
-with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
-    for line in f:
-        line = line.strip()
-        # Ignorer les lignes vides ou les commentaires
-        if not line or line.startswith('#'):
-            continue
-        # Séparer la clé de la valeur (en supposant un format key=value)
-        key, value = line.split('=', 1)
-        os.environ[key] = value
-
-#We can now use the keys
-s3_access_key_id = os.environ["S3_ACCESS_KEY_ID"]
-s3_secret_access_key = os.environ["S3_SECRET_ACCESS_KEY"]
-
-bucket_name = "avion-et-meteo"
-
-# Create a session and S3 client
-session = boto3.session.Session()
-s3_client = session.client(service_name='s3',
-    aws_access_key_id=s3_access_key_id,
-    aws_secret_access_key=s3_secret_access_key,
-)
-
-# List objects in the specific bucket
-print(f"Listing objects in bucket '{bucket_name}':")
-response = s3_client.list_objects_v2(Bucket=bucket_name)
-if 'Contents' in response:
-    for obj in response['Contents']:
-        print(f"{obj['Key']}")
-else:
-    print("Bucket is empty.")
-
-
-
-#Download the files from S3
-if 'Contents' in response:
-    for obj in response['Contents']:
-        key = obj['Key']
-        print(f"Processing: {key}")
-        
-        #Create folders
-        if '/' in key:  
-            local_path = os.path.dirname(key)  
-            if not os.path.exists(local_path):
-                os.makedirs(local_path)  
-        
-        # Download only files
-        if not key.endswith('/'):
-            s3_client.download_file(bucket_name, key, key)
-else:
-    print("Bucket is empty.")
-
-
-#Defining functions to be used later
-
-def upload_to_s3(folder, file_name):
-    """
-    Upload a document to S3 bucket
-
-    Args:
-        folder (str): folder name
-        file_name (str): file name
-    """
-
-    #For pictures from matplotlib, works also if not a picture
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)  # Remettre le pointeur du buffer au début
-
-    try:
-        s3_client.upload_fileobj(buffer, bucket_name, f"{folder}/{file_name}")
-        print(f"Le document a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
-    except Exception as e:
-        print(f"Une erreur s'est produite lors du chargement : {e}")
-
-    buffer.close()'''
-
+#Function to use later
 def check_nan_columns(df):
     """Checks and prints the columns containing NaN values
 
