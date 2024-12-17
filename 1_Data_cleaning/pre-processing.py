@@ -76,6 +76,10 @@ for file_path_in_s3 in files_in_source:
         
         print(f"File {file_name} has been successfully copied to {file_path_for_you}")
 
+#Create folders inside S3
+if not fs.exists(f"{YOUR_BUCKET}/diffusion/Pre-processed_data"):
+    fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")
+
 #Creating the variables
 dataframes = {}
 
@@ -188,8 +192,7 @@ def check_nan_columns(df):
 
 
 
-'''#Export datasets
-df.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processing/df.csv", index=False)'''
+
 
 
 
@@ -265,18 +268,23 @@ JFK_2017.drop(['Hours', 'Minutes', 'departure_time'], axis=1, inplace=True)
 print(JFK_2017[['FL_DATE', 'DEP_TIME', 'Full_Departure_Datetime']].head())
 
 #Isolating the data for machine learning 
-JKF_no_number_data = JFK_2017[['Full_Departure_Datetime', 'FL_DATE','OP_UNIQUE_CARRIER','OP_CARRIER_AIRLINE_ID','OP_CARRIER','TAIL_NUM','OP_CARRIER_FL_NUM','ORIGIN_AIRPORT_ID','ORIGIN_AIRPORT_SEQ_ID','ORIGIN_CITY_MARKET_ID','DEST_AIRPORT_ID','DEST_CITY_MARKET_ID','DEST', 'DEP_TIME','ARR_TIME']]
-JFK_numbers = JFK_2017[['DEP_DELAY','ARR_DELAY','CANCELLED','CARRIER_DELAY','WEATHER_DELAY','Full_Departure_Datetime']]
-JFK_numbers['CANCELLED'] = JFK_numbers['CANCELLED'].astype(int)
-print(JFK_numbers.info())
+JFK_2017_no_number = JFK_2017[['Full_Departure_Datetime', 'FL_DATE','OP_UNIQUE_CARRIER','OP_CARRIER_AIRLINE_ID','OP_CARRIER','TAIL_NUM','OP_CARRIER_FL_NUM','ORIGIN_AIRPORT_ID','ORIGIN_AIRPORT_SEQ_ID','ORIGIN_CITY_MARKET_ID','DEST_AIRPORT_ID','DEST_CITY_MARKET_ID','DEST', 'DEP_TIME','ARR_TIME']]
+JFK_2017_number = JFK_2017[['DEP_DELAY','ARR_DELAY','CANCELLED','CARRIER_DELAY','WEATHER_DELAY','Full_Departure_Datetime']]
+JFK_2017_number['CANCELLED'] = JFK_2017_number['CANCELLED'].astype(int)
+print(JFK_2017_number.info())
 
 #Exporting the dataset for JFK planes
 JFK_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017.csv", index=False)
-JFK_2017.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017.csv", index=False)
+with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017.csv", "w") as path:
+    JFK_2017.to_csv(path)
+
 JFK_2017_no_number.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_no_number.csv", index=False)
-JFK_2017_no_number.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_no_number.csv", index=False)
-JFK_2017_numbers.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_numbers.csv", index=False)
-JFK_2017_numbers.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_numbers.csv", index=False)
+with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_no_number.csv", "w") as path:
+    JFK_2017_no_number.to_csv(path)
+
+JFK_2017_number.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_2017_number.csv", index=False)
+with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_number.csv", "w") as path:
+    JFK_2017_number.to_csv(path)
 
 
 
@@ -284,7 +292,7 @@ JFK_2017_numbers.to_csv(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_nu
 #Part 1.2 : Pre-processing the weather data
 
 #We take only the data for the year 2017
-weather = pd.read_csv('Data-preprocessing/jfk_weather.csv')
+weather = dataframes['jfk_weather.csv']
 weather['DATE'] = pd.to_datetime(weather['DATE'])
 weather_2017 = weather[weather['DATE'].dt.year == 2017]
 #print(weather_2017.head())
@@ -364,7 +372,8 @@ weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astyp
 print(weather_2017.info())
 print(weather_2017.head())
 weather_2017.to_csv("/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.csv", index=False)
-upload_to_s3("Pre-Processed_data", "weather_2017.csv")
+with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/weather_2017.csv", "w") as path:
+    weather_2017.to_csv(path)
 
 
 
