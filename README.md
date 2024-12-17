@@ -105,3 +105,7 @@ Pour garantir une approche scientifique et reproductible :
 ---
 
 Pour toute contribution ou question, n’hésitez pas à ouvrir une issue ou soumettre une pull request. 🚀
+
+
+## Pistes d'amélioration
+- Scraper les réseaux sociaux des compagnies pour détecter les grèves

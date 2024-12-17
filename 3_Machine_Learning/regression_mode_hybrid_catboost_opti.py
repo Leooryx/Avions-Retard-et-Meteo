@@ -1,4 +1,4 @@
-#In this program, we test out hybrid models and then an optimization of catboosts parameters
+#In this program, we test out hybrid models and then an optimization of the corresponding parameters
 import pandas as pd
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.linear_model import LinearRegression
@@ -6,27 +6,22 @@ from sklearn.ensemble import StackingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from catboost import CatBoostRegressor
 import numpy as np
-import matplotlib.pyplot as plt
 
 # Load the data
-file_path = '/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv'
-try:
-    df = pd.read_csv(file_path)
-except Exception as e:
-    print(f"Error loading file: {e}")
-    exit()
+file_path = 'Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv'
+df = pd.read_csv(file_path)
 
 # Select features and target
-exclude_columns = ['DEP_DELAY', 'ARR_DELAY', 'CARRIER_DELAY', 'WEATHER_DELAY', 'CANCELLED']
+exclude_columns = ['DEP_DELAY', 'ARR_DELAY', 'CARRIER_DELAY', 'WEATHER_DELAY', 'CANCELLED'] # We can't use these variables in our model because they depend on whether or not the plane has been late or not
 feature_columns = [col for col in df.columns if col not in exclude_columns]
-target_column = 'DEP_DELAY'
+target_column = 'DEP_DELAY' # The variable we want to predict
 
 X = df[feature_columns]
 y = df[target_column]
 
 
 # Split the data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
 # --------------------------- Step 3: Hybrid Model (Stacking) ---------------------------
 print("\nFitting Stacking Model...")
