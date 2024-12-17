@@ -113,6 +113,7 @@ print(len(december_JFK)) #168
 #Total size = 2138
 year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, august_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
 JFK_2017 = pd.concat(year, ignore_index=True)
+JFK_2017.drop(columns=['Unnamed: 0'], inplace=True)
 print(JFK_2017)
 #print(len(JFK_2017))
 
@@ -172,6 +173,9 @@ with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_number.csv", 
 
 #We take only the data for the year 2017
 weather = dataframes['jfk_weather.csv']
+weather.drop(columns=['Unnamed: 0'], inplace=True)
+
+
 weather['DATE'] = pd.to_datetime(weather['DATE'])
 weather_2017 = weather[weather['DATE'].dt.year == 2017]
 #print(weather_2017.head())
@@ -245,7 +249,7 @@ Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
 weather_2017.drop(columns=Celsius, inplace=True)
 
 #We set all variables to be float, expect time
-weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 2:].astype(float)], axis=1)
+weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astype(float)], axis=1)
 
 print(weather_2017.info())
 print(weather_2017.head())
@@ -296,8 +300,7 @@ print(merged_df.info())
 
 plane_weather_for_ML = merged_df.drop(columns=['Full_Departure_Datetime', 'DATE_weather'])
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/plane_weather_for_ML.csv", "w") as path:
-    merged_df.to_csv(path)
+    plane_weather_for_ML.to_csv(path)
 
-
-
+print(plane_weather_for_ML.info())
 

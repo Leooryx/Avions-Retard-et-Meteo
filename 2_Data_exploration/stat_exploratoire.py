@@ -21,6 +21,58 @@ import numpy as np
 from datetime import timedelta
 import seaborn as sns
 import matplotlib.dates as mdates
+import s3fs
+
+
+
+
+#Download the files from leoacpr by typing your SSP Cloud username
+#This can take a while because the files are heavy
+
+fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
+
+MY_BUCKET = "leoacpr"
+print(fs.ls(MY_BUCKET))
+'''source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+files_in_source = fs.ls(source_folder)
+
+YOUR_BUCKET = str(input("Type your bucket: \n"))
+
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+files_in_source = fs.ls(source_folder)
+
+
+# Copying the dataframe from leoacpr to your s3 database
+for file_path_in_s3 in files_in_source:
+    file_name = file_path_in_s3.split('/')[-1]  # Name of the file without the path
+
+    # If the file already exists in your database, then it won't download it
+    if fs.ls(f"{MY_BUCKET}/diffusion/Pre-processing") != fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
+        file_path_for_you = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
+        #import
+        with fs.open(file_path_in_s3, "r") as file_in:
+            df_imported = pd.read_csv(file_in)
+        #export
+        with fs.open(file_path_for_you, "w") as file_out:
+            df_imported.to_csv(file_out)
+        
+        print(f"File {file_name} has been successfully copied to {file_path_for_you}")
+
+#Create folders inside S3
+if not fs.exists(f"{YOUR_BUCKET}/diffusion/Pre-processed_data"):
+    fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")'''
+
+#Downloading the dataframes
+dataframes = {}
+
+for files in fs.ls(f"{MY_BUCKET}/diffusion/Pre-processed_data"):
+    with fs.open(files, "r") as file_in:
+            df_imported = pd.read_csv(file_in)
+            print(f"Downloading {files}")
+    # Dictionnary of dataframes with the name of the file as a key
+    dataframes[f"{files.split('/')[-1]}"] = df_imported
+
+print(dataframes['plane_weather.csv'])
 
 '''#Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
@@ -114,15 +166,12 @@ def upload_to_s3(folder, file_name):
 
 
 
-plane_weather = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.csv')
-plane_weather_for_ML = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv')
-JFK_numbers = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.csv')
-weather_2017 = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.csv')
+plane_weather = dataframes['plane_weather.csv']
+plane_weather_for_ML = dataframes['plane_weather_for_ML.csv']
+JFK_2017_number = dataframes['JFK_2017_number.csv']
+weather_2017 = dataframes['weather_2017.csv']
 
-print("\nRésumé statistique des vols et de la météo :")
-plane_weather.describe().to_csv('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv')
-#est-ce que je peux en faire une image ?
-#TODO : comment rendre la lisibilité meilleure ?
+
 
 
 plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
@@ -285,6 +334,7 @@ plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the mo
 
 
 #STEP 2: finding relations between the variables
+print(plane_weather_for_ML.info())
 corr_matrix = plane_weather_for_ML.corr()
 plt.figure(figsize=(13, 11))
 sns.heatmap(corr_matrix, annot=False, cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.4, linecolor='black')
