@@ -26,7 +26,8 @@ with fs.open(FILE_PATH_IN_S3, "r") as file_in:
     df_imported = pd.read_csv(file_in)
 print(df_imported)
 
-#Download the files from leoacpr
+#Download the files from leoacpr by typing your SSP Cloud username
+#This can take a while because the files are heavy
 
 YOUR_BUCKET = str(input("Type your bucket: \n"))
 source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
