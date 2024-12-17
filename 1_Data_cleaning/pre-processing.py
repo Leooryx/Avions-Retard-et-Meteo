@@ -12,13 +12,83 @@
 #keys, region and default output format (txt)
 
 #pip install boto3
-import boto3
+#import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
 import os
 import numpy as np
 from datetime import timedelta
+
+
+
+#test without private S3
+
+#Download the files from leoacpr by typing your SSP Cloud username
+#This can take a while because the files are heavy
+
+import s3fs
+
+fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
+
+MY_BUCKET = "leoacpr"
+print(fs.ls(MY_BUCKET))
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+files_in_source = fs.ls(source_folder)
+
+YOUR_BUCKET = str(input("Type your bucket: \n"))
+
+
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+files_in_source = fs.ls(source_folder)
+
+import s3fs
+import pandas as pd
+
+# Initialiser l'accès à MinIO avec s3fs
+fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
+
+# Définir le bucket source et le dossier source
+MY_BUCKET = "leoacpr"
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+
+# Liste tous les fichiers dans le dossier source
+files_in_source = fs.ls(source_folder)
+
+# Dictionnaire pour stocker les DataFrames
+
+
+# Parcourir tous les fichiers du dossier source
+for file_path_in_s3 in files_in_source:
+    file_name = file_path_in_s3.split('/')[-1]  # Nom du fichier sans le chemin complet
+
+    # Vérifier si le fichier n'existe pas déjà dans le dossier de destination
+    if fs.ls(f"{MY_BUCKET}/diffusion/Pre-processing") != fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
+        file_path_for_you = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
+
+        # Importer le fichier depuis S3 dans un DataFrame
+        with fs.open(file_path_in_s3, "r") as file_in:
+            df_imported = pd.read_csv(file_in)
+        
+        # Sauvegarder le fichier dans YOUR_BUCKET
+        with fs.open(file_path_for_you, "w") as file_out:
+            df_imported.to_csv(file_out)
+        
+        print(f"File {file_name} has been successfully copied to {file_path_for_you}")
+
+#Creating the variables
+dataframes = {}
+
+for files in fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
+    with fs.open(file_path_in_s3, "r") as file_in:
+            df_imported = pd.read_csv(file_in)
+    # Ajouter le DataFrame dans le dictionnaire en utilisant le nom du fichier comme clé
+    dataframes[f"{files.split('/')[-1]}"] = df_imported
+
+# Exemple : Accéder à un DataFrame spécifique
+# Par exemple, pour accéder au DataFrame du fichier "january.csv"
+print(dataframes['jfk_weather.csv'])
+#ok ça marche
 
 
 '''
@@ -125,9 +195,9 @@ def check_nan_columns(df):
 #We decide to focus on JFK airport, whose identification number is 10135
 
 #Merging the monthly datasets to obtain a dataset for 2017
-january_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_january.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+january_JFK = pd.read_csv(f'{files_in_preprocessing_data}/T_ONTIME_REPORTING_january.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(january_JFK)) #191
-february_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_february.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
+february_JFK = pd.read_csv(f'{files_in_preprocessing_data}/T_ONTIME_REPORTING_february.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(february_JFK)) #128
 march_JFK = pd.read_csv('Data-preprocessing/T_ONTIME_REPORTING_march.csv')[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
 print(len(march_JFK)) #167
@@ -152,7 +222,107 @@ print(len(december_JFK)) #168
 #Total size = 2138
 year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, august_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
 JFK_2017 = pd.concat(year, ignore_index=True)
-#print(len(JFK_2017))
+print(JFK_2017)
+#print(len(JFK_2017))'''
+
+
+
+
+
+
+
+
+
+'''files_in_preprocessing_data
+
+# Liste des mois de l'année 2017
+months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
+
+# Initialisation de la liste pour stocker les DataFrames mensuels
+year_data = []
+
+for file_path_in_s3 in files_in_source:
+    file_name = file_path_in_s3.split('/')[-1]
+# Filtrer l'ORIGIN_AIRPORT_ID de JFK (10135) et lire les fichiers mensuels
+for month in months:
+    # Construire le nom du fichier pour chaque mois
+    file_path = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
+    
+    # Lire le fichier et filtrer pour ORIGIN_AIRPORT_ID == 10135 (JFK)
+    monthly_data = pd.read_csv(file_path)[lambda df: df["ORIGIN_AIRPORT_ID"] == 10135]
+    
+    # Afficher la taille du DataFrame mensuel
+    print(f'{month.capitalize()} JFK: {len(monthly_data)} rows')
+    
+    # Ajouter le DataFrame mensuel à la liste
+    year_data.append(monthly_data)
+
+# Concaténer tous les DataFrames mensuels dans un seul DataFrame pour 2017
+JFK_2017 = pd.concat(year_data, ignore_index=True)
+
+# Afficher la taille du DataFrame final pour 2017
+print(f'Total size for JFK 2017: {len(JFK_2017)} rows')'''
+
+
+
+
+import s3fs
+import pandas as pd
+
+# Initialisation de l'accès à MinIO avec s3fs
+fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
+
+# Demander à l'utilisateur d'entrer le nom du bucket de destination
+YOUR_BUCKET = str(input("Type your bucket: \n"))
+
+# Définir le bucket source et le dossier source
+MY_BUCKET = "leoacpr/diffusion"
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+
+# Liste tous les fichiers dans le dossier source
+files_in_source = fs.ls(source_folder)
+
+# Liste pour stocker les DataFrames
+all_dataframes = []
+
+# Parcourir tous les fichiers du dossier source
+for file_path_in_s3 in files_in_source:
+    # Extraire le nom du fichier pour le conserver dans le même dossier sur le bucket de destination
+    file_name = file_path_in_s3.split('/')[-1]  # Nom du fichier sans le chemin complet
+    
+    # Ouvrir et lire le fichier CSV depuis le bucket S3
+    with fs.open(file_path_in_s3, "r") as file_in:
+        df_imported = pd.read_csv(file_in)
+    
+    # Ajouter le DataFrame dans la liste
+    all_dataframes.append(df_imported)
+
+# Fusionner tous les DataFrames en un seul DataFrame
+merged_df = pd.concat(all_dataframes, ignore_index=True)
+
+# Afficher la taille du DataFrame fusionné
+print(f"Total size of the merged DataFrame: {len(merged_df)} rows")
+
+# Optionnel : Sauvegarder le DataFrame fusionné dans YOUR_BUCKET
+output_file_path = f"{YOUR_BUCKET}/diffusion/Pre-processing/merged_data.csv"
+with fs.open(output_file_path, "w") as file_out:
+    merged_df.to_csv(file_out, index=False)
+
+print(f"Merged data saved to {output_file_path}")
+
+
+
+
+
+
+'''
+
+
+
+
+
+
+
 
 
 #Setting the rights data types
