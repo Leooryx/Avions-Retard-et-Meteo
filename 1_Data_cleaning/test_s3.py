@@ -8,7 +8,7 @@ fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspclou
 
 #pour rendre les fichiers public il faut créer un dossier diffusion à la racine du bucket
 MY_BUCKET = "leoacpr"
-print(fs.ls(MY_BUCKET))
+#print(fs.ls(MY_BUCKET))
 
 import pandas as pd
 data = {'Colonne_1': [1, 2],'Colonne_2': [3, 4]}

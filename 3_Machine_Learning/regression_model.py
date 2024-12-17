@@ -1,6 +1,7 @@
+#Import the packages and load the data
 #pip install openpyxl
 import pandas as pd
-from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, cross_val_predict
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import StackingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -8,7 +9,7 @@ from catboost import CatBoostRegressor
 import numpy as np
 
 # Load the data
-file_path = 'Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv'
+file_path = 'Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv'
 df = pd.read_csv(file_path)
 
 # Select features and target
@@ -22,65 +23,40 @@ y = df[target_column]
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-# Normaliser les données
+# Prepare data for the PCA
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Appliquer PCA
-pca = PCA(n_components=0.8)  # Conserver 95% de la variance
+# PCA
+pca = PCA(n_components=0.8)  # Keep 80% of the variance
 X_pca = pca.fit_transform(X_scaled)
 
 print(f"Nombre de composantes principales retenues : {X_pca.shape[1]}")
 
 
-# Split the data into train and test sets 80/20
-X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.1, random_state=42)
+# Modèle Linear Regression
+lin_reg = LinearRegression()
+y_pred_lin = cross_val_predict(lin_reg, X_pca, y, cv=5)  # 5-fold cross-validation
 
-# Verify split
-print(f"\nTraining set: {X_train.shape[0]} samples")
-print(f"Test set: {X_test.shape[0]} samples")
+# Modèle Random Forest
+rf_reg = RandomForestRegressor(n_estimators=50, max_depth=5, random_state=42)
+y_pred_rf = cross_val_predict(rf_reg, X_pca, y, cv=5)
 
-# Baseline model: Linear Regression
-print("\nFitting Linear Regression model...")
-lin_reg = LinearRegression() 
-lin_reg.fit(X_train, y_train)
+# Modèle XGBoost
+xgb_reg = XGBRegressor(n_estimators=50, learning_rate=0.1, max_depth=5, random_state=42)
+y_pred_xgb = cross_val_predict(xgb_reg, X_pca, y, cv=5)
 
-# Make predictions
-y_pred_lin = lin_reg.predict(X_test)
+# Calcul des métriques
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# Evaluate performance
-mae_lin = mean_absolute_error(y_test, y_pred_lin)
-rmse_lin = mean_squared_error(y_test, y_pred_lin, squared=False)
-r2_lin = r2_score(y_test, y_pred_lin)
-print(f"\nLinear Regression Results:\nMAE: {mae_lin:.2f}, RMSE: {rmse_lin:.2f}, R^2: {r2_lin:.2f}")
+print("\nLinear Regression:")
+print(f"MAE: {mean_absolute_error(y, y_pred_lin):.2f}, RMSE: {mean_squared_error(y, y_pred_lin, squared=False):.2f}, R²: {r2_score(y, y_pred_lin):.2f}")
 
-# Intermediate model: Random Forest Regressor
-print("\nFitting Random Forest model...")
-rf_reg = RandomForestRegressor(n_estimators=50, random_state=42, max_depth=5)
-rf_reg.fit(X_train, y_train)
+print("\nRandom Forest:")
+print(f"MAE: {mean_absolute_error(y, y_pred_rf):.2f}, RMSE: {mean_squared_error(y, y_pred_rf, squared=False):.2f}, R²: {r2_score(y, y_pred_rf):.2f}")
 
-# Make predictions
-y_pred_rf = rf_reg.predict(X_test)
-
-# Evaluate performance
-mae_rf = mean_absolute_error(y_test, y_pred_rf)
-rmse_rf = mean_squared_error(y_test, y_pred_rf, squared=False)
-r2_rf = r2_score(y_test, y_pred_rf)
-print(f"\nRandom Forest Results:\nMAE: {mae_rf:.2f}, RMSE: {rmse_rf:.2f}, R^2: {r2_rf:.2f}")
-
-# Advanced model: XGBoost Regressor
-print("\nFitting XGBoost model...")
-xgb_reg = xgb.XGBRegressor(n_estimators=50, learning_rate=0.1, random_state=42, max_depth=5)
-xgb_reg.fit(X_train, y_train)
-
-# Make predictions
-y_pred_xgb = xgb_reg.predict(X_test)
-
-# Evaluate performance
-mae_xgb = mean_absolute_error(y_test, y_pred_xgb)
-rmse_xgb = mean_squared_error(y_test, y_pred_xgb, squared=False)
-r2_xgb = r2_score(y_test, y_pred_xgb)
-print(f"\nXGBoost Results:\nMAE: {mae_xgb:.2f}, RMSE: {rmse_xgb:.2f}, R^2: {r2_xgb:.2f}")
+print("\nXGBoost:")
+print(f"MAE: {mean_absolute_error(y, y_pred_xgb):.2f}, RMSE: {mean_squared_error(y, y_pred_xgb, squared=False):.2f}, R²: {r2_score(y, y_pred_xgb):.2f}")
 
 # Compare models
 results = {
