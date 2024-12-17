@@ -1,31 +1,23 @@
 #pip install openpyxl
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import StackingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import xgboost as xgb
-import matplotlib.pyplot as plt
+from catboost import CatBoostRegressor
+import numpy as np
 
 # Load the data
-file_path = '/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv'
+file_path = 'Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv'
 df = pd.read_csv(file_path)
 
-# Inspect the data - REMOVE THIS PART WHEN FINISHED
-print("Data preview:")
-print(df.head())
-print("\nData information:")
-print(df.info())
-
-# Select relevant features and target column
-# We make sure the model doesn't use variables that are calculated after the flight because we won't have them as an input
-exclude_columns = ['DEP_DELAY', 'ARR_DELAY', 'CARRIER_DELAY', 'WEATHER_DELAY', 'CANCELLED']
+# Select features and target
+exclude_columns = ['DEP_DELAY', 'ARR_DELAY', 'CARRIER_DELAY', 'WEATHER_DELAY', 'CANCELLED'] # We can't use these variables in our model because they depend on whether or not the plane has been late or not
 feature_columns = [col for col in df.columns if col not in exclude_columns]
-target_column = 'DEP_DELAY'  # Column that we want to predict
+target_column = 'DEP_DELAY' # The variable we want to predict
 
 X = df[feature_columns]
 y = df[target_column]
-
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
