@@ -21,6 +21,58 @@ import numpy as np
 from datetime import timedelta
 import seaborn as sns
 import matplotlib.dates as mdates
+import s3fs
+
+
+
+
+#Download the files from leoacpr by typing your SSP Cloud username
+#This can take a while because the files are heavy
+
+fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
+
+MY_BUCKET = "leoacpr"
+print(fs.ls(MY_BUCKET))
+'''source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+files_in_source = fs.ls(source_folder)
+
+YOUR_BUCKET = str(input("Type your bucket: \n"))
+
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+files_in_source = fs.ls(source_folder)
+
+
+# Copying the dataframe from leoacpr to your s3 database
+for file_path_in_s3 in files_in_source:
+    file_name = file_path_in_s3.split('/')[-1]  # Name of the file without the path
+
+    # If the file already exists in your database, then it won't download it
+    if fs.ls(f"{MY_BUCKET}/diffusion/Pre-processing") != fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
+        file_path_for_you = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
+        #import
+        with fs.open(file_path_in_s3, "r") as file_in:
+            df_imported = pd.read_csv(file_in)
+        #export
+        with fs.open(file_path_for_you, "w") as file_out:
+            df_imported.to_csv(file_out)
+        
+        print(f"File {file_name} has been successfully copied to {file_path_for_you}")
+
+#Create folders inside S3
+if not fs.exists(f"{YOUR_BUCKET}/diffusion/Pre-processed_data"):
+    fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")'''
+
+#Downloading the dataframes
+dataframes = {}
+
+for files in fs.ls(f"{MY_BUCKET}/diffusion/Pre-processed_data"):
+    with fs.open(files, "r") as file_in:
+            df_imported = pd.read_csv(file_in)
+            print(f"Downloading {files}")
+    # Dictionnary of dataframes with the name of the file as a key
+    dataframes[f"{files.split('/')[-1]}"] = df_imported
+
+print(dataframes['plane_weather.csv'])
 
 '''#Opening and reading the .env file
 with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
@@ -102,34 +154,23 @@ def upload_to_s3(folder, file_name):
     buffer.close()'''
 
 
-#PARTIE 2 : Analyse exploratoire
+#Load the data
+plane_weather = dataframes['plane_weather.csv']
+plane_weather_for_ML = dataframes['plane_weather_for_ML.csv']
+JFK_2017_number = dataframes['JFK_2017_number.csv']
+weather_2017 = dataframes['weather_2017.csv']
+plane_weather.drop(columns=['Unnamed: 0'], inplace=True)
+plane_weather_for_ML.drop(columns=['Unnamed: 0'], inplace=True)
+JFK_2017_number.drop(columns=['Unnamed: 0'], inplace=True)
+weather_2017.drop(columns=['Unnamed: 0'], inplace=True)
 
 
 #STEP 1: Exploring the plane and weather datasets
-
-
-#weather_2017 = pd.read_csv('Pre-Processed_data/weather_2017.csv')
-#plane_weather = pd.read_csv('Pre-Processed_data/plane_weather.csv') #problem of encoding
-#TODO problem of encoding when i try to read files directly from S3
-
-
-
-plane_weather = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather.csv')
-plane_weather_for_ML = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv')
-JFK_numbers = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/JFK_numbers.csv')
-weather_2017 = pd.read_csv('/home/onyxia/work/Avions-Retard-et-Meteo/1_Data_cleaning/weather_2017.csv')
-
-print("\nRésumé statistique des vols et de la météo :")
-plane_weather.describe().to_csv('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/plane_weather_summary.csv')
-#est-ce que je peux en faire une image ?
-#TODO : comment rendre la lisibilité meilleure ?
-
 
 plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
 plane_weather['DATE_weather'] = pd.to_datetime(plane_weather['DATE_weather'])
 print(plane_weather.info())
 
-'''
 # Retards moyens par mois
 plane_weather['Month'] = plane_weather['Full_Departure_Datetime'].dt.month
 monthly_delays = plane_weather.groupby('Month')[['DEP_DELAY', 'ARR_DELAY']].mean()
@@ -173,19 +214,19 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/3_Distrib_retard_météo.png')
 #upload_to_s3("Pictures", "3_Distrib_retard_météo.png")
 
-# Moyenne des retards dus aux conditions météorologiques par mois
-weather_delay_monthly = plane_weather.groupby('Month')['WEATHER_DELAY'].mean()
-
+# Somme des retards dus aux conditions météorologiques par mois
+weather_delay_monthly = plane_weather.groupby('Month')['WEATHER_DELAY'].sum()
 plt.figure(figsize=(10, 6))
 weather_delay_monthly.plot(kind='bar', color='teal', alpha=0.8, edgecolor='black')
-plt.title("Retards moyens dus à la météo par mois", fontsize=16)
-plt.ylabel("Retard moyen (minutes)", fontsize=12)
+plt.title("Somme des retards dus à la météo par mois", fontsize=16)
+plt.ylabel("Somme des retards (minutes)", fontsize=12)
 plt.xlabel("Mois", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
-#plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_Retard_météo_moyen.png')
+
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_Retard_météo_somme.png')
 #upload_to_s3("Pictures", "4_Retard_météo_moyen.png")
+plane_weather.drop(columns=['Month'], inplace=True)
 
 
 #Proportions of delays
@@ -213,8 +254,6 @@ plt.title('Average Proportion of Delay Explanations')
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Proportions_of_delays.png')
 #upload_to_s3("Pictures", "5_Proportions_of_delay.png")
-
-#deleting the new columns
 plane_weather = plane_weather.drop(columns=['carrier_delay_ratio', 'weather_delay_ratio', 'unexplained_delay_ratio'])
 
 
@@ -235,12 +274,16 @@ def format_subplot(ax, data, x_column, y_column, label, color, ylabel):
 ax1 = plt.subplot(4, 1, 1)
 format_subplot(ax1, plane_weather, 'Full_Departure_Datetime', 'DAILYMaximumDryBulbTemp', 'Max Temp', 'orange', 'Temperature (°F)')
 sns.lineplot(data=plane_weather, x='Full_Departure_Datetime', y='DAILYMinimumDryBulbTemp', label='Min Temp', color='blue', ax=ax1)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 ax2 = plt.subplot(4, 1, 2)
 format_subplot(ax2, plane_weather, 'Full_Departure_Datetime', 'DAILYPrecip', 'Daily Precip', 'black', 'Precipitation')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 ax3 = plt.subplot(4, 1, 3)
 format_subplot(ax3, plane_weather, 'Full_Departure_Datetime', 'DAILYSnowDepth', 'Daily Snow', 'blue', 'Snow Depth')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 ax4 = plt.subplot(4, 1, 4)
 format_subplot(ax4, plane_weather, 'Full_Departure_Datetime', 'HOURLYStationPressure', 'Pressure', 'gray', 'Pressure (in Hg)')
+plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to avoid title overlap
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/6_weather_2017_summary.png', dpi=300)
 
@@ -271,6 +314,7 @@ for i, month in enumerate(months):
     ax = plt.subplot(3, 4, i+1)
     format_subplot(ax, month_data, 'DATE_weather', ['DAILYPrecip', 'DAILYSnowDepth', 'HOURLYStationPressure', 'DAILYAverageDryBulbTemp'], labels, colors, 'Values')
     ax.set_title(f'{month}')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
     
 plt.suptitle('Weather Month by Month', fontsize=16, fontweight='bold')
 
@@ -279,7 +323,7 @@ plt.tight_layout(rect=[0, 0, 1, 0.95]) # Adjust layout for title
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/7_month_by_month.png', dpi=300)
 
-plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification'''
+plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification
 
 
 
@@ -289,8 +333,8 @@ corr_matrix = plane_weather_for_ML.corr()
 plt.figure(figsize=(13, 11))
 sns.heatmap(corr_matrix, annot=False, cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.4, linecolor='black')
 ticks = np.arange(len(plane_weather_for_ML.columns))
-'''plt.xticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=90)
-plt.yticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=0)'''
+#plt.xticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=90)
+#plt.yticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=0)
 
 plt.xticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=90)
 plt.yticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=0)
@@ -372,7 +416,6 @@ for i in range(ax_idx, len(axes)):
 plt.tight_layout()
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/9_Scatter_plot.png', dpi=300)
-
 
 
 
