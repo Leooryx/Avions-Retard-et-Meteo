@@ -11,8 +11,6 @@
 #aws configure
 #keys, region and default output format (txt)
 
-#pip install boto3
-import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
@@ -33,7 +31,7 @@ fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspclou
 
 MY_BUCKET = "leoacpr"
 print(fs.ls(MY_BUCKET))
-'''source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
+source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
 files_in_source = fs.ls(source_folder)
 
 YOUR_BUCKET = str(input("Type your bucket: \n"))
@@ -60,7 +58,7 @@ for file_path_in_s3 in files_in_source:
 
 #Create folders inside S3
 if not fs.exists(f"{YOUR_BUCKET}/diffusion/Pre-processed_data"):
-    fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")'''
+    fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")
 
 #Downloading the dataframes
 dataframes = {}
