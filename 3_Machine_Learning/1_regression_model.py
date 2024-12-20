@@ -44,7 +44,7 @@ X_scaled = scaler.fit_transform(X)
 pca = PCA(n_components=0.95)  # Keep 95% of the variance
 X_pca = pca.fit_transform(X_scaled)
 
-print(f"Nombre de composantes principales retenues : {X_pca.shape[1]}")
+print(f"Numbre of principle components : {X_pca.shape[1]}")
 
 
 # Linear Regression
