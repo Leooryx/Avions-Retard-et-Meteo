@@ -2,15 +2,6 @@
 
 #Requirements
 
-
-#pas nécessairement utile de télécharger AMZ CLI
-#curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-#unzip awscliv2.zip
-#sudo ./aws/install
-
-#aws configure
-#keys, region and default output format (txt)
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
@@ -30,35 +21,9 @@ import s3fs
 fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
 
 MY_BUCKET = "leoacpr"
-print(fs.ls(MY_BUCKET))
 source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
 files_in_source = fs.ls(source_folder)
 
-YOUR_BUCKET = str(input("Type your bucket: \n"))
-
-source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
-files_in_source = fs.ls(source_folder)
-
-
-# Copying the dataframe from leoacpr to your s3 database
-for file_path_in_s3 in files_in_source:
-    file_name = file_path_in_s3.split('/')[-1]  # Name of the file without the path
-
-    # If the file already exists in your database, then it won't download it
-    if fs.ls(f"{MY_BUCKET}/diffusion/Pre-processing") != fs.ls(f"{YOUR_BUCKET}/diffusion/Pre-processing"):
-        file_path_for_you = f"{YOUR_BUCKET}/diffusion/Pre-processing/{file_name}"
-        #import
-        with fs.open(file_path_in_s3, "r") as file_in:
-            df_imported = pd.read_csv(file_in)
-        #export
-        with fs.open(file_path_for_you, "w") as file_out:
-            df_imported.to_csv(file_out)
-        
-        print(f"File {file_name} has been successfully copied to {file_path_for_you}")
-
-#Create folders inside S3
-if not fs.exists(f"{YOUR_BUCKET}/diffusion/Pre-processed_data"):
-    fs.touch(f"{YOUR_BUCKET}/diffusion/.{Pre-processed_data}]")
 
 #Downloading the dataframes
 dataframes = {}
@@ -71,85 +36,6 @@ for files in fs.ls(f"{MY_BUCKET}/diffusion/Pre-processed_data"):
     dataframes[f"{files.split('/')[-1]}"] = df_imported
 
 print(dataframes['plane_weather.csv'])
-
-'''#Opening and reading the .env file
-with open('/home/onyxia/work/Avions-Retard-et-Meteo/.env') as f:
-    for line in f:
-        line = line.strip()
-        # Ignorer les lignes vides ou les commentaires
-        if not line or line.startswith('#'):
-            continue
-        # Séparer la clé de la valeur (en supposant un format key=value)
-        key, value = line.split('=', 1)
-        os.environ[key] = value
-
-#We can now use the keys
-s3_access_key_id = os.environ["S3_ACCESS_KEY_ID"]
-s3_secret_access_key = os.environ["S3_SECRET_ACCESS_KEY"]
-
-bucket_name = "avion-et-meteo"
-
-# Create a session and S3 client
-session = boto3.session.Session()
-s3_client = session.client(service_name='s3',
-    aws_access_key_id=s3_access_key_id,
-    aws_secret_access_key=s3_secret_access_key,
-)
-
-# List objects in the specific bucket
-print(f"Listing objects in bucket '{bucket_name}':")
-response = s3_client.list_objects_v2(Bucket=bucket_name)
-if 'Contents' in response:
-    for obj in response['Contents']:
-        print(f"{obj['Key']}")
-else:
-    print("Bucket is empty.")
-
-
-
-#Download the files from S3
-if 'Contents' in response:
-    for obj in response['Contents']:
-        key = obj['Key']
-        if 'Pre-Processed_data/' in key:
-            print(f"Processing: {key}")
-    
-            #Create folders
-            if '/' in key:  
-                local_path = os.path.dirname(key)  
-                if not os.path.exists(local_path):
-                    os.makedirs(local_path)  
-            
-            # Download only files
-            if not key.endswith('/'):
-                s3_client.download_file(bucket_name, key, key)
-else:
-    print("Bucket is empty.")
-
-
-#Defining functions to be used later
-
-def upload_to_s3(folder, file_name):
-    """
-    Upload a document to S3 bucket
-
-    Args:
-        folder (str): folder name
-        file_name (str): file name
-    """
-
-    #For pictures from matplotlib, works also if not a picture
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)  # Remettre le pointeur du buffer au début
-
-    try:
-        s3_client.upload_fileobj(buffer, bucket_name, f"{folder}/{file_name}")
-        print(f"Le document a été chargé avec succès dans le bucket S3 '{bucket_name}' sous le nom '{file_name}'.")
-    except Exception as e:
-        print(f"Une erreur s'est produite lors du chargement : {e}")
-
-    buffer.close()'''
 
 
 #Load the data
@@ -169,61 +55,51 @@ plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_De
 plane_weather['DATE_weather'] = pd.to_datetime(plane_weather['DATE_weather'])
 print(plane_weather.info())
 
-# Retards moyens par mois
+# Mean delays per month
 plane_weather['Month'] = plane_weather['Full_Departure_Datetime'].dt.month
 monthly_delays = plane_weather.groupby('Month')[['DEP_DELAY', 'ARR_DELAY']].mean()
-
-# Visualisation des retards moyens par mois
-file_name = 'Retards_moyens.png'
 plt.figure(figsize=(10, 6))
 monthly_delays.plot(kind='bar', figsize=(12, 6))
-plt.title("Retards moyens par mois", fontsize=16)
-plt.ylabel("Retard moyen (minutes)", fontsize=12)
-plt.xlabel("Mois", fontsize=12)
+plt.title("Mean delays per month", fontsize=16)
+plt.ylabel("Mean delay (minutes)", fontsize=12)
+plt.xlabel("Month", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
-plt.legend(["Retard au départ", "Retard à l'arrivée"])
+plt.legend(["Departure delay", "Arrival delay"])
 plt.grid(axis='y', linestyle='--', alpha=0.7)
-#plt.show()
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/1_mean_delays.png')
 
-#Chargement "local" pour visualisation rapide
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/1_Retards_moyens.png')
-#Chargement le fichier vers S3 et enregistrement le graphique dans un buffer en mémoire
-#upload_to_s3("Pictures", "1_Retards_moyens.png")
 
-# Distribution des retards au départ
+# Distribution of departure delays
 plt.figure(figsize=(10, 6))
 sns.histplot(plane_weather['DEP_DELAY'], bins=50, kde=True, color='blue', edgecolor='black')
-plt.title("Distribution des retards au départ", fontsize=16)
-plt.xlabel("Retard au départ (minutes)", fontsize=12)
-plt.ylabel("Nombre de vols", fontsize=12)
+plt.title("Distribution of departure delays", fontsize=16)
+plt.xlabel("Departure delay (minutes)", fontsize=12)
+plt.ylabel("Number of flights", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
-#plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/2_Distrib_retard_départ.png')
-#upload_to_s3("Pictures", "2_Distrib_retard_départ.png")
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/2_distribution_delays.png')
 
-# Distribution des retards dus aux conditions météorologiques
+# Distribution of weather delays
 plt.figure(figsize=(10, 6))
 sns.histplot(plane_weather['WEATHER_DELAY'], bins=50, kde=True, color='orange', edgecolor='black')
-plt.title("Distribution des retards dus aux conditions météorologiques", fontsize=16)
-plt.xlabel("Retard dû à la météo (minutes)", fontsize=12)
-plt.ylabel("Nombre de vols", fontsize=12)
+plt.title("Distribution of weather delays", fontsize=16)
+plt.xlabel("Weather delays (minutes)", fontsize=12)
+plt.ylabel("Numbers of flights", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/3_Distrib_retard_météo.png')
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/3_Distrib_weather_delays.png')
 #upload_to_s3("Pictures", "3_Distrib_retard_météo.png")
 
-# Somme des retards dus aux conditions météorologiques par mois
+# Sum of weather delays per months
 weather_delay_monthly = plane_weather.groupby('Month')['WEATHER_DELAY'].sum()
 plt.figure(figsize=(10, 6))
 weather_delay_monthly.plot(kind='bar', color='teal', alpha=0.8, edgecolor='black')
-plt.title("Somme des retards dus à la météo par mois", fontsize=16)
-plt.ylabel("Somme des retards (minutes)", fontsize=12)
-plt.xlabel("Mois", fontsize=12)
+plt.title("Sum of weather delays per month", fontsize=16)
+plt.ylabel("Sum delays (minutes)", fontsize=12)
+plt.xlabel("Month", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_sum_weather_delays.png')
 
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_Retard_météo_somme.png')
-#upload_to_s3("Pictures", "4_Retard_météo_moyen.png")
 plane_weather.drop(columns=['Month'], inplace=True)
 
 
@@ -249,9 +125,7 @@ legend_labels = [f'{label} ({percentage})' for label, percentage in zip(labels, 
 plt.title('Average Proportion of Delay Explanations')
 plt.legend(wedges, legend_labels, title="Delay Categories", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
 plt.title('Average Proportion of Delay Explanations')
-
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Proportions_of_delays.png')
-#upload_to_s3("Pictures", "5_Proportions_of_delay.png")
 plane_weather = plane_weather.drop(columns=['carrier_delay_ratio', 'weather_delay_ratio', 'unexplained_delay_ratio'])
 
 
@@ -259,7 +133,7 @@ plane_weather = plane_weather.drop(columns=['carrier_delay_ratio', 'weather_dela
 plt.figure(figsize=(8.27, 11.69))  # A4 size (in inches)
 plt.suptitle('Weather Characterization Throughout 2017', fontsize=16, fontweight='bold')
 
-# Fonction pour formater les axes de chaque sous-graphique
+# Function to format subplots
 def format_subplot(ax, data, x_column, y_column, label, color, ylabel):
     sns.lineplot(data=data, x=x_column, y=y_column, label=label, color=color, ax=ax)
     ax.set_xlabel('Date')
@@ -288,7 +162,7 @@ plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/picture
 
 
 #Plot month by month weather
-# Set the figure size and style for aesthetics
+
 plt.figure(figsize=(12, 9))
 
 # Function to format subplots
@@ -316,7 +190,7 @@ for i, month in enumerate(months):
     
 plt.suptitle('Weather Month by Month', fontsize=16, fontweight='bold')
 
-plt.legend(loc='center', bbox_to_anchor=(-1.2, -0.09), ncol=4)  # Légende centrée en bas
+plt.legend(loc='center', bbox_to_anchor=(-1.2, -0.09), ncol=4) 
 plt.tight_layout(rect=[0, 0, 1, 0.95]) # Adjust layout for title
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/7_month_by_month.png', dpi=300)
@@ -331,8 +205,6 @@ corr_matrix = plane_weather_for_ML.corr()
 plt.figure(figsize=(13, 11))
 sns.heatmap(corr_matrix, annot=False, cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.4, linecolor='black')
 ticks = np.arange(len(plane_weather_for_ML.columns))
-#plt.xticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=90)
-#plt.yticks(ticks, np.arange(1, len(plane_weather_for_ML.columns) + 1), rotation=0)
 
 plt.xticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=90)
 plt.yticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=0)
@@ -350,12 +222,11 @@ for i in range(len(corr_matrix.columns)):
             strongly_correlated_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
             variables_to_remove.add(corr_matrix.columns[j])
 
-# Afficher les paires fortement corrélées
 for pair in strongly_correlated_pairs:
     print(f'Variables: {pair[0]} & {pair[1]}, Corrélation: {pair[2]:.2f}')
 
 
-#We remove strongly correlated variables
+#We remove some strongly correlated variables
 
 variables_to_keep = [var for var in corr_matrix.columns if var not in variables_to_remove]
 variables_to_keep.append('DEP_DELAY') #we keep DEP_DELAY because this is the variable with the most information about delays
@@ -388,29 +259,26 @@ axes = axes.flatten()
 # counter for axes index
 ax_idx = 0
 
-# Parcourir toutes les paires de variables
+# Going through all the variables
 for i in range(n_vars):
-    for j in range(i):  # Afficher uniquement sous la diagonale
+    for j in range(i):  # we keep the plots for the variables below the correlation matrix to avoid repetition
         sns.scatterplot(x=plane_weather_no_corr.iloc[:, i], 
                         y=plane_weather_no_corr.iloc[:, j], 
                         ax=axes[ax_idx], 
-                        color='blue', s=5)  # s définit la taille des points
+                        color='blue', s=5)  
         axes[ax_idx].set_xlabel(plane_weather_no_corr.columns[i], fontsize=8)
         axes[ax_idx].set_ylabel(plane_weather_no_corr.columns[j], fontsize=8)
         axes[ax_idx].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
         axes[ax_idx].tick_params(axis='y', which='both', left=False, right=False, labelleft=False) #delete values for the axis, we just want the name of the variable
-
-        # Supprimer les ticks
         axes[ax_idx].tick_params(axis='both', which='both', length=0)
         
-        # Passer au prochain graphique
+        # Next plot
         ax_idx += 1
 
-# Masquer les axes vides (si il y a des graphiques en trop dans la grille)
+# Mask empty axes
 for i in range(ax_idx, len(axes)):
     axes[i].axis('off')
 
-# Ajuster l'espacement entre les graphiques pour un affichage plus propre
 plt.tight_layout()
 
 plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/9_Scatter_plot.png', dpi=300)
