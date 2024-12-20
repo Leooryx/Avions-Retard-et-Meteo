@@ -66,7 +66,7 @@ plt.xlabel("Month", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
 plt.legend(["Departure delay", "Arrival delay"])
 plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/1_mean_delays.png')
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/1_mean_delays.png')
 
 
 # Distribution of departure delays
@@ -76,7 +76,7 @@ plt.title("Distribution of departure delays", fontsize=16)
 plt.xlabel("Departure delay (minutes)", fontsize=12)
 plt.ylabel("Number of flights", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/2_distribution_delays.png')
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/2_distribution_delays.png')
 
 # Distribution of weather delays
 plt.figure(figsize=(10, 6))
@@ -86,7 +86,7 @@ plt.xlabel("Weather delays (minutes)", fontsize=12)
 plt.ylabel("Numbers of flights", fontsize=12)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 #plt.show()
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/3_Distrib_weather_delays.png')
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/3_Distrib_weather_delays.png')
 #upload_to_s3("Pictures", "3_Distrib_retard_météo.png")
 
 # Sum of weather delays per months
@@ -98,7 +98,7 @@ plt.ylabel("Sum delays (minutes)", fontsize=12)
 plt.xlabel("Month", fontsize=12)
 plt.xticks(range(0, 12), ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], rotation=45)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_sum_weather_delays.png')
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/4_sum_weather_delays.png')
 
 plane_weather.drop(columns=['Month'], inplace=True)
 
@@ -125,7 +125,7 @@ legend_labels = [f'{label} ({percentage})' for label, percentage in zip(labels, 
 plt.title('Average Proportion of Delay Explanations')
 plt.legend(wedges, legend_labels, title="Delay Categories", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1), fontsize=10)
 plt.title('Average Proportion of Delay Explanations')
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Proportions_of_delays.png')
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/5_Proportions_of_delays.png')
 plane_weather = plane_weather.drop(columns=['carrier_delay_ratio', 'weather_delay_ratio', 'unexplained_delay_ratio'])
 
 
@@ -157,7 +157,7 @@ ax4 = plt.subplot(4, 1, 4)
 format_subplot(ax4, plane_weather, 'Full_Departure_Datetime', 'HOURLYStationPressure', 'Pressure', 'gray', 'Pressure (in Hg)')
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to avoid title overlap
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/6_weather_2017_summary.png', dpi=300)
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/6_weather_2017_summary.png', dpi=300)
 
 
 
@@ -193,7 +193,7 @@ plt.suptitle('Weather Month by Month', fontsize=16, fontweight='bold')
 plt.legend(loc='center', bbox_to_anchor=(-1.2, -0.09), ncol=4) 
 plt.tight_layout(rect=[0, 0, 1, 0.95]) # Adjust layout for title
 
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/7_month_by_month.png', dpi=300)
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/7_month_by_month.png', dpi=300)
 
 plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the modification
 
@@ -210,7 +210,7 @@ plt.xticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weat
 plt.yticks(ticks=np.arange(len(plane_weather_for_ML.columns)), labels=plane_weather_for_ML.columns, rotation=0)
 
 plt.title('Correlation Matrix of Variables')
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/8_Corr_matrix.png', dpi=300)
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/8_Corr_matrix.png', dpi=300)
 
 #Isolating the variables with a strong correlation
 threshold = 0.7
@@ -281,7 +281,7 @@ for i in range(ax_idx, len(axes)):
 
 plt.tight_layout()
 
-plt.savefig('/home/onyxia/work/Avions-Retard-et-Meteo/2_Data_exploration/pictures/9_Scatter_plot.png', dpi=300)
+plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/9_Scatter_plot.png', dpi=300)
 
 
 
