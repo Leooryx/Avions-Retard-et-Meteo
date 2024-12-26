@@ -82,7 +82,7 @@ def check_nan_columns(df):
 
 #Part 1.1 : Pre-processing the planes data
 
-#Hypothesis: plane's delays are similarly sensitive to weather variations --> we can generalize the situation for an airpot to others
+#Hypothesis: plane's delays are similarly sensitive to weather variations --> we can generalize the situation for an airport to others
 #We decide to focus on JFK airport, whose identification number is 10135
 
 #Merging the monthly datasets to obtain a dataset for 2017
@@ -186,7 +186,7 @@ print(weather.info())
 
 
 #Columns with "Monthly", "Hourly" ou "Daily" contains only one value for the unit they represent.
-# for example for a montlhy columns, only the last day of the corresponding month contains a value
+# for example for a monthly columns, only the last day of the corresponding month contains a value
 # We need to extend this
 
 # Extracting the columns "Monthly", "Hourly" ou "Daily"
