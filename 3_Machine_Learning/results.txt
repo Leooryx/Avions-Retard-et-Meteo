@@ -45,3 +45,7 @@ Conclusions Générales
 Optimisation des modèles et suppression des valeurs extrêmes réduisent significativement MAE et RMSE, mais R² reste faible.
 Feature engineering avec des logs ou polynômes ne donne pas de résultats concluants.
 Modèle hybride (Stacking) offre les meilleures performances globales mais reste limité.
+The performance of the different machine learning models tested confirms what the correlation matrix indicated: 
+delays are uncorrelated with weather conditions, so they cannot be predicted by the weather. 
+Wind speed stands out significantly as the most explanatory feature, which is quite an intuitive result, but it still does not allow for effective prediction. 
+This may indicate that the airport studied is able to adapt well to bad weather conditions.
