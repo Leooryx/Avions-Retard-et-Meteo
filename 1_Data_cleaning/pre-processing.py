@@ -16,7 +16,7 @@ import s3fs
 
 fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
 
-MY_BUCKET = "leoacpr"
+MY_BUCKET = "leo"
 print(fs.ls(MY_BUCKET))
 source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
 files_in_source = fs.ls(source_folder)

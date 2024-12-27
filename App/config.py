@@ -1,2 +1,2 @@
 # File that contains API key(s)
-API_KEY = "e459070013933993e80f9c55aae3cb42"
+API_KEY="cm55z39om0001lg03twx8lcyk"
