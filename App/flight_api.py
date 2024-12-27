@@ -1,11 +1,12 @@
 import requests
-from datetime import datetime, timedelta
+
 
 def normalize_string(s):
     return s.strip().lower() if s else None
 
+
 def get_flight_info(flight_number, flight_date, api_key):
-    API_URL = f"https://api.magicapi.dev/api/v1/aedbx/aerodatabox/flights/Number/{flight_number}?withAircraftImage=true&withLocation=false"
+    API_URL = f"https://api.magicapi.dev/api/v1/aedbx/aerodatabox/flights/Number/{flight_number}/2024-12-22?withAircraftImage=true&withLocation=false"
 
     headers = {
         "x-magicapi-key": api_key
