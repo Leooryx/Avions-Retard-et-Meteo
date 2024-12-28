@@ -3,10 +3,10 @@ Variables that we want to use     Description in the glossary                   
 HOURLYWindSpeed                   Speed of the wind at the time of observation given in miles per hour (mph).                               Hourly Wind Speed (10 m)
 HOURLYRelativeHumidity            This is the relative humidity given to the nearest whole percentage.                                      Hourly Relative Humidity (2 m)
 HOURLYStationPressure             Atmospheric pressure observed at the station  (in inches of Mercury)                                      Hourly Surface Pressure
-HOURLYSeaLevelPressure            Sea level pressure given in inches of Mercury (in Hg).                                                    Hourly Sealevel Pressure
+XHOURLYSeaLevelPressure            Sea level pressure given in inches of Mercury (in Hg).                                                    Hourly Sealevel Pressure
 DAILYAverageStationPressure       Daily average station pressure (in inches of mercury, to hundredths)                                      Not available, we will take the mean of Hourly Surface Pressure
 HOURLYWETBULBTEMPF                This is the wet-bulb temperature. It is given here in whole degrees Fahrenheit                            Calculated with Stull Equation and Temp and DewPoint
-HOURLYAltimeterSetting            Atm pressure reduced to sea level using temp profile of the “standard” atmosphere (inches of Mercury)     Calculated with altitude (3m) and Station Pressure
+XHOURLYAltimeterSetting            Atm pressure reduced to sea level using temp profile of the “standard” atmosphere (inches of Mercury)     Calculated with altitude (3m) and Station Pressure
 HOURLYDRYBULBTEMPC                This is the dry-bulb temperature and is commonly used as the standard air temperature reported (in C°)    Temperature (2 m)
 HOURLYDewPointTempF               This is the dew point temperature. It is given here in whole degrees Fahrenheit.                          Dewpoint (2 m)
 HOURLYVISIBILITY                  The horizontal distance an object can be seen and identified given in whole miles.                        Visibility
@@ -22,7 +22,7 @@ from math import atan, sqrt
 def fetch_weather_data(api_url):
     # Fetch data from the weather API
     response = requests.get(api_url)
-    print(response)
+
     if response.status_code == 200:
         data = response.json()
         hourly_data = data.get('hourly', {})
@@ -85,11 +85,9 @@ def fetch_weather_data(api_url):
             'HOURLYWindSpeed',
             'HOURLYRelativeHumidity',
             'HOURLYStationPressure',
-            'HOURLYSeaLevelPressure',
-            'DAILYAverageStationPressure',
             'HOURLYWETBULBTEMPF',
-            'HOURLYAltimeterSetting',
             'HOURLYDRYBULBTEMPF',
+            'DAILYAverageStationPressure',
             'HOURLYDewPointTempF',
             'HOURLYVISIBILITY'
         ]

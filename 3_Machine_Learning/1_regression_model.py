@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 from math import sqrt
 import os
 import s3fs
+import joblib
+
+
 
 
 
@@ -68,7 +71,7 @@ file_path = 'Avions-Retard-et-Meteo/1_Data_cleaning/plane_weather_for_ML.csv'
 df = pd.read_csv(file_path)"""
 
 # Select features and target
-exclude_columns = ['DEP_DELAY', 'ARR_DELAY', 'CARRIER_DELAY', 'WEATHER_DELAY', 'CANCELLED'] # We can't use these variables in our model because they depend on whether or not the plane has been late or not
+exclude_columns = ['DEP_DELAY', 'ARR_DELAY', 'CARRIER_DELAY', 'WEATHER_DELAY', 'CANCELLED', 'HOURLYSeaLevelPressure', 'HOURLYAltimeterSetting']  # We can't use these variables in our model because they depend on whether or not the plane has been late or not, and we saw in the descriptive stats that the pressure at the station and at the sea level and the altimeter setting are really correlated
 feature_columns = [col for col in df.columns if col not in exclude_columns]
 target_column = 'DEP_DELAY' # The variable we want to predict
 
@@ -96,7 +99,7 @@ print(f"Numbre of principle components : {X_pca.shape[1]}")
 
 
 # Linear Regression
-lin_reg = LinearRegression()
+lin_reg = LinearRegression(fit_intercept=True)
 y_pred_lin = cross_val_predict(lin_reg, X_pca, y, cv=5)  # 5-fold cross-validation
 
 # Random Forest
@@ -143,8 +146,8 @@ feature_importance_df = pd.DataFrame({
     'Importance': importances
 }).sort_values(by='Importance', ascending=False)
 
-# Then we select the most important features (example here the 10 most)
-top_features = feature_importance_df.head(10)['Feature']
+# Then we select the most important features (example here the 8 most)
+top_features = feature_importance_df.head(8)['Feature']
 X_selected = X[top_features]
 
 
@@ -152,7 +155,7 @@ X_selected = X[top_features]
 output_dir = 'Avions-Retard-et-Meteo/3_Machine_Learning/pictures'
 os.makedirs(output_dir, exist_ok=True)
 plt.figure(figsize=(10, 6))
-plt.barh(feature_importance_df['Feature'].head(10), feature_importance_df['Importance'].head(10))
+plt.barh(feature_importance_df['Feature'].head(8), feature_importance_df['Importance'].head(8))
 plt.xlabel("Importance")
 plt.ylabel("Feature")
 plt.title("Top 10 Feature Importances")
@@ -204,16 +207,24 @@ results_df_FI = pd.DataFrame(results)
 print("\nComparison of Model Performance (Feature Importance):")
 print(results_df_FI)
 
-# Linear Regression performs better with Feature Importance (MAE: 26.72 vs 34.95, RMSE: 74.06 vs 81.80, R^2: 0.006 vs -0.212)
-# Random Forest improves slightly with Feature Importance (MAE: 30.49 vs 40.73, RMSE: 85.26 vs 90.50, R^2: -0.317 vs -0.484)
-# XGBoost shows better results with Feature Importance but still underperforms (MAE: 33.35 vs 55.20, RMSE: 94.35 vs 136.75, R^2: -0.613 vs -2.387)
-# Feature Importance provides more relevant features for all models compared to PCA
+"""
+Linear Regression performs better with Feature Importance (MAE: 26.28 vs 34.90, RMSE: 74.72 vs 81.80, R^2: -0.011 vs -0.212)
+Random Forest improves slightly with Feature Importance (MAE: 31.65 vs 52.45, RMSE: 88.32 vs 106.15, R^2: -0.413 vs -1.041)
+XGBoost shows better results with Feature Importance but still underperforms (MAE: 32.88 vs 91.04, RMSE: 92.90 vs 211.86, R^2: -0.563 vs -7.131)
+Feature Importance provides more relevant features for all models compared to PCA.
 
 
-# Using Feature Importance, model performance remains limited, with all models showing weak predictive power.
-# Linear Regression has a modest MAE (26.72) and RMSE (74.06) but offers almost no explanatory strength (R^2: 0.006).
-# Random Forest improves slightly (MAE: 30.49, RMSE: 85.26), but its R^2 (-0.317) indicates poor generalization.
-# XGBoost, despite reducing MAE (33.35), still struggles with high RMSE (94.35) and very low R^2 (-0.613).
+Using Feature Importance, model performance remains limited, with all models showing weak predictive power.
+Linear Regression:
+With Feature Importance, Linear Regression achieves a MAE of 26.28 and an RMSE of 74.72, both better than the PCA approach (MAE: 34.90, RMSE: 81.80). However, the R² remains slightly negative (-0.011), indicating that the model explains almost none of the variance in the data. Despite this, it still provides the most coherent predictions among all tested models.
+
+Random Forest:
+Random Forest improves with Feature Importance (MAE: 31.65, RMSE: 88.32) compared to PCA (MAE: 52.45, RMSE: 106.15). However, its R² score of -0.413 suggests poor generalization. While slightly better than PCA, Random Forest predictions are less consistent compared to Linear Regression.
+
+XGBoost:
+XGBoost shows the highest error with Feature Importance (MAE: 32.88, RMSE: 92.90) and the worst R² score (-0.563). While marginally better than the PCA-based approach (MAE: 91.04, RMSE: 211.86), its performance remains weak overall.
+"""
+
 # Overall, while Feature Importance improves focus on relevant features, the results suggest that the models lack strong predictive and explanatory power.
 
 
@@ -221,14 +232,48 @@ print(results_df_FI)
 
 # The feature importance plot provides insights into the factors contributing to departure delays.
 # HOURLYWindSpeed stands out as the most important feature, aligning with expectations since wind speed directly impacts flight schedules.
-# Other weather-related variables like HOURLYRelativeHumidity, HOURLYStationPressure, and HOURLYSeaLevelPressure also have notable contributions.
+# Other weather-related variables like HOURLYRelativeHumidity, HOURLYStationPressure also have notable contributions.
 # Interestingly, DAILYAverageStationPressure and HOURLYWETBULBTEMPF indicate that both daily and hourly weather metrics are relevant.
 # Even though our predictive power is limited, the feature importance highlights key weather variables, offering valuable insights into the relationship between weather conditions and delays.
-
 
 # The feature importance highlights key weather variables like wind speed and humidity, and the
 # minimal delays caused by weather reflect the technological advancements and robustness of modern 
 # aircraft in handling adverse conditions.
 
-# Although the explanatory power (R²) is nearly negligible, Linear Regression offers the lowest MAE and RMSE among all models. This indicates 
-# it performs slightly better in predicting departure delays, even if the predictions are not strong.
+"""
+Key Observations:
+Feature Importance provides better results across all models compared to PCA by focusing on relevant features, reducing noise, and ensuring better interpretability.
+Linear Regression, while lacking strong explanatory power (as shown by the near-zero R²), offers the lowest MAE and RMSE, making it the best choice among the tested models for this dataset.
+We are aware of the limited predictive power of our models due to the weak R² values. However, Linear Regression still generates the most coherent and realistic predictions, particularly when Feature Importance is used.
+Experimentation Process and Rationale:
+Initial Setup:
+We initially included all available variables in our models, leading to overfitting and unrealistic predictions, such as planes always being very early or significantly delayed.
+
+Feature Reduction:
+Through successive adjustments and analysis, we reduced the features to the 8 most relevant variables based on Feature Importance.
+
+Pressure Variables:
+Initially, we included both HOURLYStationPressure and HOURLYSeaLevelPressure, which were highly correlated. This caused the model to predict unrealistic results, with planes often being far ahead of schedule. Removing one of the pressure variables improved prediction consistency.
+
+Final Choice:
+Linear Regression with Feature Importance, using 8 carefully selected features, achieved the best balance between low errors (MAE and RMSE) and realistic predictions.
+
+Conclusion:
+Although the predictive power of our models remains weak due to the low R² values (indicating that the models explain little variance in departure delays), the Linear Regression model with Feature Importance provides the most consistent and interpretable predictions. This is the result of iterative experimentation and careful adjustment of features, ensuring predictions align with realistic expectations while minimizing overfitting.
+"""
+
+# Entraîner le modèle sur les données sélectionnées
+lin_reg.fit(X_selected, y)  # Ajouter cette ligne ici
+
+# Sauvegarder le modèle entraîné
+model_path = 'Avions-Retard-et-Meteo/3_Machine_Learning/linear_regression_model.pkl'
+joblib.dump(lin_reg, model_path)
+
+
+# Afficher les coefficients
+coefficients = lin_reg.coef_
+features = X_selected.columns  # Les noms des colonnes sélectionnées
+
+# Afficher les coefficients avec leurs noms
+for feature, coef in zip(features, coefficients):
+    print(f"{feature}: {coef}")
