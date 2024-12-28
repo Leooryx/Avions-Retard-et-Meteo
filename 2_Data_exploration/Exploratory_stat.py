@@ -248,43 +248,6 @@ print(plane_weather_reduced.info())
 
 
 #Scatter plots:
-'''n_vars = 17
-n_pairs = n_vars * (n_vars - 1) // 2  
-
-# Calculations for the grid
-n_cols = 12
-n_rows = int(np.ceil(n_pairs / n_cols))  # Number of rows necessary
-
-fig, axes = plt.subplots(n_rows, n_cols, figsize=(25, 25))  
-
-# Flaten to ease indexation
-axes = axes.flatten()
-
-# counter for axes index
-ax_idx = 0
-
-# Going through all the variables
-for i in range(n_vars):
-    for j in range(i):  # we keep the plots for the variables below the correlation matrix to avoid repetition
-        sns.scatterplot(x=plane_weather_no_corr.iloc[:, i], 
-                        y=plane_weather_no_corr.iloc[:, j], 
-                        ax=axes[ax_idx], 
-                        color='blue', s=5)  
-        axes[ax_idx].set_xlabel(plane_weather_no_corr.columns[i], fontsize=8)
-        axes[ax_idx].set_ylabel(plane_weather_no_corr.columns[j], fontsize=8)
-        axes[ax_idx].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-        axes[ax_idx].tick_params(axis='y', which='both', left=False, right=False, labelleft=False) #delete values for the axis, we just want the name of the variable
-        axes[ax_idx].tick_params(axis='both', which='both', length=0)
-        
-        # Next plot
-        ax_idx += 1
-
-# Mask empty axes
-for i in range(ax_idx, len(axes)):
-    axes[i].axis('off')
-
-plt.tight_layout()'''
-
 
 # Variables of interest
 variables_of_interest = ['DEP_DELAY', 'WEATHER_DELAY']
