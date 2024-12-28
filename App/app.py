@@ -35,13 +35,22 @@ if search_button and flight_number and flight_date:
                 try:
                     formatted_departure_time = pd.to_datetime(departure_time).strftime('%H:%M, %a %d %b %Y')
                     st.write(f"**Departure time:** {formatted_departure_time} (local time)")
-                except Exception as e:
+                except Exception:
                     st.write("**Departure time:** Error parsing date")
             else:
                 st.write("**Departure time:** Unknown")
             
-            st.write(f"**Arrival airport:** {flight['arrival_airport']}")
-            st.write(f"**Arrival time:** {pd.to_datetime(flight['arrival_time']).strftime('%H:%M, %A %d %B %Y')} (local time)")
+            # Handle arrival time
+            arrival_time = flight.get('arrival_time', 'Unknown')
+            if arrival_time != 'Unknown':
+                try:
+                    formatted_arrival_time = pd.to_datetime(arrival_time).strftime('%H:%M, %a %d %b %Y')
+                    st.write(f"**Arrival time:** {formatted_arrival_time} (local time)")
+                except Exception:
+                    st.write("**Arrival time:** Error parsing date")
+            else:
+                st.write("**Arrival time:** Unknown")
+            
             st.write(f"**Aircraft model:** {flight['aircraft_model']}")
             if flight['aircraft_image']:
                 st.image(flight['aircraft_image'], caption=f"Aircraft ({flight['aircraft_model']})", use_container_width=True)
@@ -70,10 +79,12 @@ if search_button and flight_number and flight_date:
 
                 if weather_data is not None:
                     # Extract flight hour
-                    departure_time = flight.get('departure_time', 'Unknown')
-
                     if departure_time != 'Unknown':
-                        hour = int(departure_time.split(' ')[1].split(':')[0])
+                        try:
+                            hour = int(departure_time.split(' ')[1].split(':')[0])
+                        except Exception:
+                            hour = 12  # Default to noon if parsing fails
+                            st.write("**Note:** Departure time unknown, defaulting to noon for weather conditions.")
 
                         # Filter weather data for the flight hour
                         weather_at_departure = weather_data.iloc[hour]
@@ -84,6 +95,7 @@ if search_button and flight_number and flight_date:
                             st.write(f"- **Wet-bulb temperature:** {weather_at_departure['HOURLYWETBULBTEMPF']} °F")
                             st.write(f"- **Relative humidity:** {weather_at_departure['HOURLYRelativeHumidity']} %")
                             st.write(f"- **Visibility:** {weather_at_departure['HOURLYVISIBILITY']} miles")
+                            st.write(f"- **Wind speed:** {weather_at_departure['HOURLYWindSpeed']} mph")
                             st.write(f"- **Estimated delay:** {lin_reg.predict(weather_at_departure.to_frame().T)[0]:.2f} minutes")
                         else:
                             st.markdown("### Weather Conditions at Departure: Data Unavailable")
