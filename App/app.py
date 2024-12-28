@@ -94,7 +94,7 @@ if search_button and flight_number and flight_date:
                         try:
                             hour = int(departure_time.split(' ')[1].split(':')[0])
                         except Exception:
-                            hour = 12  # Default to noon if parsing fails
+                            hour = 12  # Default to midday if parsing fails
                             weather_info.append("**Note:** Departure time unknown, defaulting to noon for weather conditions.")
 
                         # Filter weather data for the flight hour
