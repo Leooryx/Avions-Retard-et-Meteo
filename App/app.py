@@ -29,7 +29,7 @@ if search_button and flight_number and flight_date:
             st.write(f"**Status:** {flight['status']}")
             st.write(f"**Departure airport:** {flight['departure_airport']}")
             
-            # Handle departure time
+            # Handle departure time if not available
             departure_time = flight.get('departure_time', 'Unknown')
             if departure_time != 'Unknown':
                 try:
@@ -39,7 +39,7 @@ if search_button and flight_number and flight_date:
                     st.write("**Departure time:** Error parsing date")
             else:
                 st.write("**Departure time:** Unknown")
-            
+                
             st.write(f"**Arrival airport:** {flight['arrival_airport']}")
             st.write(f"**Arrival time:** {pd.to_datetime(flight['arrival_time']).strftime('%H:%M, %A %d %B %Y')} (local time)")
             st.write(f"**Aircraft model:** {flight['aircraft_model']}")
