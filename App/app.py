@@ -11,6 +11,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))  # Directory where app.
 model_path = os.path.join(current_dir, "..", "3_Machine_Learning", "linear_regression_model.pkl")
 lin_reg = joblib.load(model_path)
 
+# Add a styled title
+st.markdown(
+    """
+    <h1 style="text-align: center; text-decoration: underline;">
+    ✈️ Flight Delay Prediction App 🌦️
+    </h1>
+    """, 
+    unsafe_allow_html=True
+)
+
 # User input
 flight_number = st.text_input("Flight number (e.g., DL1708):")
 flight_date = st.date_input("Flight date:")
@@ -25,35 +35,36 @@ if search_button and flight_number and flight_date:
     
     if isinstance(flight_data, list) and flight_data:
         for flight in flight_data:
-            st.markdown(f"### {flight['airline']} {flight['flight_number']}")
-            st.write(f"**Status:** {flight['status']}")
-            st.write(f"**Departure airport:** {flight['departure_airport']}")
+            departure_info = []
+            weather_info = []
             
-            # Handle departure time
+            # Departure info
+            departure_info.append(f"**Status:** {flight['status']}")
+            departure_info.append(f"**Departure airport:** {flight['departure_airport']}")
+            
             departure_time = flight.get('departure_time', 'Unknown')
             if departure_time != 'Unknown':
                 try:
                     formatted_departure_time = pd.to_datetime(departure_time).strftime('%H:%M, %a %d %b %Y')
-                    st.write(f"**Departure time:** {formatted_departure_time} (local time)")
+                    departure_info.append(f"**Departure time:** {formatted_departure_time} (local)")
                 except Exception:
-                    st.write("**Departure time:** Error parsing date")
+                    departure_info.append("**Departure time:** Error parsing date")
             else:
-                st.write("**Departure time:** Unknown")
-            
-            # Handle arrival time
+                departure_info.append("**Departure time:** Unknown")
+
+            departure_info.append(f"**Arrival airport:** {flight['arrival_airport']}")
+
             arrival_time = flight.get('arrival_time', 'Unknown')
             if arrival_time != 'Unknown':
                 try:
                     formatted_arrival_time = pd.to_datetime(arrival_time).strftime('%H:%M, %a %d %b %Y')
-                    st.write(f"**Arrival time:** {formatted_arrival_time} (local time)")
+                    departure_info.append(f"**Arrival time:** {formatted_arrival_time} (local)")
                 except Exception:
-                    st.write("**Arrival time:** Error parsing date")
+                    departure_info.append("**Arrival time:** Error parsing date")
             else:
-                st.write("**Arrival time:** Unknown")
-            
-            st.write(f"**Aircraft model:** {flight['aircraft_model']}")
-            if flight['aircraft_image']:
-                st.image(flight['aircraft_image'], caption=f"Aircraft ({flight['aircraft_model']})", use_container_width=True)
+                departure_info.append("**Arrival time:** Unknown")
+
+            departure_info.append(f"**Aircraft model:** {flight['aircraft_model']}")
 
             # Retrieve departure airport coordinates
             departure_airport_coords = {
@@ -62,7 +73,7 @@ if search_button and flight_number and flight_date:
             }
 
             if departure_airport_coords['lat'] is None or departure_airport_coords['lon'] is None:
-                st.write("Departure airport coordinates are not available.")
+                weather_info.append("Departure airport coordinates are not available.")
             else:
                 # Construct the weather API URL
                 weather_api_url = (
@@ -84,22 +95,38 @@ if search_button and flight_number and flight_date:
                             hour = int(departure_time.split(' ')[1].split(':')[0])
                         except Exception:
                             hour = 12  # Default to noon if parsing fails
-                            st.write("**Note:** Departure time unknown, defaulting to noon for weather conditions.")
+                            weather_info.append("**Note:** Departure time unknown, defaulting to noon for weather conditions.")
 
                         # Filter weather data for the flight hour
                         weather_at_departure = weather_data.iloc[hour]
 
                         if not weather_at_departure.empty:
-                            st.markdown("### Weather Conditions at Departure")
-                            st.write(f"- **Dry-bulb temperature:** {weather_at_departure['HOURLYDRYBULBTEMPF']} °F")
-                            st.write(f"- **Wet-bulb temperature:** {weather_at_departure['HOURLYWETBULBTEMPF']} °F")
-                            st.write(f"- **Relative humidity:** {weather_at_departure['HOURLYRelativeHumidity']} %")
-                            st.write(f"- **Visibility:** {weather_at_departure['HOURLYVISIBILITY']} miles")
-                            st.write(f"- **Wind speed:** {weather_at_departure['HOURLYWindSpeed']} mph")
-                            st.write(f"- **Estimated delay:** {lin_reg.predict(weather_at_departure.to_frame().T)[0]:.2f} minutes")
+                            weather_info.append(f"- **Wind speed:** {weather_at_departure['HOURLYWindSpeed']} mph")
+                            weather_info.append(f"- **Dry-bulb temperature:** {weather_at_departure['HOURLYDRYBULBTEMPF']} °F")
+                            weather_info.append(f"- **Wet-bulb temperature:** {weather_at_departure['HOURLYWETBULBTEMPF']:.1f} °F")
+                            weather_info.append(f"- **Relative humidity:** {weather_at_departure['HOURLYRelativeHumidity']} %")
+                            weather_info.append(f"- **Visibility:** {weather_at_departure['HOURLYVISIBILITY']:.1f} miles")
+                            weather_info.append(f"- **Estimated delay:** {lin_reg.predict(weather_at_departure.to_frame().T)[0]:.2f} minutes")
                         else:
-                            st.markdown("### Weather Conditions at Departure: Data Unavailable")
+                            weather_info.append("Weather Conditions at Departure: Data Unavailable")
                 else:
-                    st.write("Error retrieving weather data.")
+                    weather_info.append("Error retrieving weather data.")
+
+            # Display flight and weather data side by side
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("### Flight Information")
+                for info in departure_info:
+                    st.write(info)
+
+            with col2:
+                st.markdown("### Weather Information")
+                for info in weather_info:
+                    st.write(info)
+
+            # Display aircraft image
+            if flight['aircraft_image']:
+                st.image(flight['aircraft_image'], caption=f"Aircraft ({flight['aircraft_model']})", use_container_width=True)
     else:
         st.write(flight_data)  # If an error occurred or no flight was found
