@@ -181,3 +181,6 @@ print(results_df_FI)
 # The feature importance highlights key weather variables like wind speed and humidity, and the
 # minimal delays caused by weather reflect the technological advancements and robustness of modern 
 # aircraft in handling adverse conditions.
+
+# Although the explanatory power (R²) is nearly negligible, Linear Regression offers the lowest MAE and RMSE among all models. This indicates 
+# it performs slightly better in predicting departure delays, even if the predictions are not strong.
