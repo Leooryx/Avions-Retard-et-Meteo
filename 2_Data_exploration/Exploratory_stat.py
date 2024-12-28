@@ -201,6 +201,7 @@ plane_weather['DAILYPrecip'] = plane_weather['DAILYPrecip']/10 #to remove the mo
 
 
 #STEP 2: finding relations between the variables
+plane_weather_for_ML = plane_weather_for_ML.drop(columns=['CANCELLED'])
 corr_matrix = plane_weather_for_ML.corr()
 plt.figure(figsize=(13, 11))
 sns.heatmap(corr_matrix, annot=False, cmap='RdYlGn', center=0, cbar_kws={'label': 'Correlation Coefficient'}, linewidths=0.4, linecolor='black')
@@ -226,11 +227,14 @@ for pair in strongly_correlated_pairs:
     print(f'Variables: {pair[0]} & {pair[1]}, Corrélation: {pair[2]:.2f}')
 
 
-#We remove some strongly correlated variables
 
-variables_to_keep = [var for var in corr_matrix.columns if var not in variables_to_remove]
+#We remove some strongly correlated variables
+#We remove cancel because it doesnt add any insight
+variables_to_keep = [var for var in corr_matrix.columns if var not in variables_to_remove and var != 'CANCELLED']
 variables_to_keep.append('DEP_DELAY') #we keep DEP_DELAY because this is the variable with the most information about delays
 print("\nVariables to keep :", variables_to_keep)
+
+
 
 # We delete the useless variables in the dataframe
 plane_weather_no_corr = plane_weather[variables_to_keep]
@@ -244,44 +248,55 @@ print(plane_weather_reduced.info())
 
 
 #Scatter plots:
-n_vars = 18
-n_pairs = n_vars * (n_vars - 1) // 2  
+
+# Variables of interest
+variables_of_interest = ['DEP_DELAY', 'WEATHER_DELAY']
 
 # Calculations for the grid
-n_cols = 12
-n_rows = int(np.ceil(n_pairs / n_cols))  # Number of rows necessary
+n_vars = len(variables_to_keep)
+n_cols = 8  # Adjust as needed for better visualization
+n_rows = 4
+fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, 10))
 
-fig, axes = plt.subplots(n_rows, n_cols, figsize=(25, 25))  
-
-# Flaten to ease indexation
+# Flatten axes for easier indexing
 axes = axes.flatten()
 
-# counter for axes index
+# Counter for axes index
 ax_idx = 0
 
-# Going through all the variables
-for i in range(n_vars):
-    for j in range(i):  # we keep the plots for the variables below the correlation matrix to avoid repetition
-        sns.scatterplot(x=plane_weather_no_corr.iloc[:, i], 
-                        y=plane_weather_no_corr.iloc[:, j], 
+# Generate scatter plots for DEP_DELAY and WEATHER_DELAY against other variables
+for var in variables_of_interest:
+    for other_var in [v for v in plane_weather_no_corr.columns if v != var]:
+        sns.scatterplot(x=plane_weather_no_corr[other_var], 
+                        y=plane_weather_no_corr[var], 
                         ax=axes[ax_idx], 
-                        color='blue', s=5)  
-        axes[ax_idx].set_xlabel(plane_weather_no_corr.columns[i], fontsize=8)
-        axes[ax_idx].set_ylabel(plane_weather_no_corr.columns[j], fontsize=8)
-        axes[ax_idx].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-        axes[ax_idx].tick_params(axis='y', which='both', left=False, right=False, labelleft=False) #delete values for the axis, we just want the name of the variable
-        axes[ax_idx].tick_params(axis='both', which='both', length=0)
+                        color='blue', s=5)
         
-        # Next plot
+        axes[ax_idx].set_xlabel(other_var, fontsize=8)
+        axes[ax_idx].set_ylabel(var, fontsize=8)
+        axes[ax_idx].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+        axes[ax_idx].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+        
+        # Move to next axis
         ax_idx += 1
 
-# Mask empty axes
+# Mask any remaining empty axes
 for i in range(ax_idx, len(axes)):
     axes[i].axis('off')
 
 plt.tight_layout()
 
+
+
 plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/9_Scatter_plot.png', dpi=300)
+#plt.show()
+
+
+
+
+
+
+
 
 
 
