@@ -24,7 +24,6 @@ MY_BUCKET = "leoacpr"
 source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
 files_in_source = fs.ls(source_folder)
 
-
 #Downloading the dataframes
 dataframes = {}
 
@@ -35,10 +34,7 @@ for files in fs.ls(f"{MY_BUCKET}/diffusion/Pre-processed_data"):
     # Dictionnary of dataframes with the name of the file as a key
     dataframes[f"{files.split('/')[-1]}"] = df_imported
 
-print(dataframes['plane_weather.csv'])
-
-
-#Load the data
+#Load the data and remove useless columns
 plane_weather = dataframes['plane_weather.csv']
 plane_weather_for_ML = dataframes['plane_weather_for_ML.csv']
 JFK_2017_number = dataframes['JFK_2017_number.csv']
@@ -53,7 +49,6 @@ weather_2017.drop(columns=['Unnamed: 0'], inplace=True)
 
 plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
 plane_weather['DATE_weather'] = pd.to_datetime(plane_weather['DATE_weather'])
-print(plane_weather.info())
 
 # Mean delays per month
 plane_weather['Month'] = plane_weather['Full_Departure_Datetime'].dt.month
