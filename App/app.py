@@ -102,7 +102,7 @@ if search_button and flight_number and flight_date:
 
                         if not weather_at_departure.empty:
                             weather_info.append(f"- **Wind speed:** {weather_at_departure['HOURLYWindSpeed']} mph")
-                            weather_info.append(f"- **Dry-bulb temperature:** {weather_at_departure['HOURLYDRYBULBTEMPF']} °F")
+                            weather_info.append(f"- **Dry-bulb temperature:** {weather_at_departure['HOURLYDRYBULBTEMPF']:.1f} °F")
                             weather_info.append(f"- **Wet-bulb temperature:** {weather_at_departure['HOURLYWETBULBTEMPF']:.1f} °F")
                             weather_info.append(f"- **Relative humidity:** {weather_at_departure['HOURLYRelativeHumidity']} %")
                             weather_info.append(f"- **Visibility:** {weather_at_departure['HOURLYVISIBILITY']:.1f} miles")
