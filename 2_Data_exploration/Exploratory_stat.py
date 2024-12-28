@@ -292,9 +292,8 @@ variables_of_interest = ['DEP_DELAY', 'WEATHER_DELAY']
 # Calculations for the grid
 n_vars = len(variables_to_keep)
 n_cols = 8  # Adjust as needed for better visualization
-#n_rows = int(np.ceil(len(variables_of_interest) * (n_vars - 1) / n_cols))
 n_rows = 4
-fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, n_rows * 5))
+fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, 10))
 
 # Flatten axes for easier indexing
 axes = axes.flatten()
@@ -323,10 +322,6 @@ for i in range(ax_idx, len(axes)):
     axes[i].axis('off')
 
 plt.tight_layout()
-
-# Uncomment to save the plot
-#plt.savefig('Avions-Retard-et-Meteo/2_Data_exploration/pictures/TEST.png', dpi=300)
-
 
 
 
