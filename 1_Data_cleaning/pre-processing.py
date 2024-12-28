@@ -17,7 +17,7 @@ import s3fs
 fs = s3fs.S3FileSystem(client_kwargs={"endpoint_url": "https://minio.lab.sspcloud.fr"})
 
 MY_BUCKET = "leo"
-print(fs.ls(MY_BUCKET))
+#print(fs.ls(MY_BUCKET))
 source_folder = f"{MY_BUCKET}/diffusion/Pre-processing"
 files_in_source = fs.ls(source_folder)
 
@@ -249,7 +249,9 @@ Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
 weather_2017.drop(columns=Celsius, inplace=True)
 
 #We set all variables to be float, expect time
-weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astype(float)], axis=1)
+print(weather_2017.head())
+#delete the two first columns because it starts with Unnamed 0 and DATE to convert the rest to float
+weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 2:].astype(float)], axis=1)
 
 print(weather_2017.info())
 print(weather_2017.head())
