@@ -16,12 +16,12 @@ def get_flight_info(flight_number, flight_date, api_key):
     if response.status_code == 200:
         data = response.json()
 
-        # Extraire les informations pertinentes
+        # Extract the flight information from the JSON
         flight_info = []
 
         for flight in data:
             try:
-                # Récupérer les informations
+                # Collect the informations
                 status = flight.get("status", "Unknown")
                 departure_airport = flight.get("departure", {}).get("airport", {}).get("name", "Unknown")
                 departure_time = flight.get("departure", {}).get("scheduledTime", {}).get("local", "Unknown")
@@ -31,19 +31,19 @@ def get_flight_info(flight_number, flight_date, api_key):
                 aircraft_model = flight.get("aircraft", {}).get("model", "Unknown")
                 aircraft_image = flight.get("aircraft", {}).get("image", {}).get("url")
 
-                # Coordonnées des aéroports
+                # Coordinates of the airports
                 departure_lat = flight.get("departure", {}).get("airport", {}).get("location", {}).get("lat", None)
                 departure_lon = flight.get("departure", {}).get("airport", {}).get("location", {}).get("lon", None)
                 arrival_lat = flight.get("arrival", {}).get("airport", {}).get("location", {}).get("lat", None)
                 arrival_lon = flight.get("arrival", {}).get("airport", {}).get("location", {}).get("lon", None)
 
-                # Normalisation des noms d'aéroports
+                # Normalize the airports names
                 normalized_departure = normalize_string(departure_airport)
                 normalized_arrival = normalize_string(arrival_airport)
 
-                # Vérifier si l'aéroport de départ est différent de l'aéroport d'arrivée
+                # Check if the arrival and departure airport are different (because sometimes there are flights from an airport to the same)
                 if departure_airport != "Unknown" and arrival_airport != "Unknown" and normalized_departure != normalized_arrival:
-                    # Ajouter les informations valides dans la liste
+                    # Add the informations
                     flight_info.append({
                         "flight_number": flight_number,
                         "status": status,
@@ -60,7 +60,7 @@ def get_flight_info(flight_number, flight_date, api_key):
                         "aircraft_image": aircraft_image
                     })
             except Exception as e:
-                print(f"Erreur lors du traitement des données du vol: {e}")
+                print(f"Error while treating the data: {e}")
 
         return flight_info
     else:
