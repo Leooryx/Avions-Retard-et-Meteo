@@ -2,7 +2,7 @@ Descriptive statistics allow us to observe that there are more delays at departu
 on average five minutes early, whereas they depart on average late). The months with the most delays are January, April, and December; on the other 
 hand, February and November have the least delays.
 
-The vast majority of flights depart on time or with a negligible delay, which means that the sample size we will be working with is relatively small. 
+The vast majority of flights depart on time or with a negligible delay, most of which are equal to zero. 
 The majority of delays are of a duration of two hours or less, suggesting that weather-related delays are likely due to slightly unfavorable weather 
 conditions (such as waiting for the rain to lessen before taking off), rather than extremely unfavorable conditions (like an exceptional storm), which 
 is consistent with the relative frequency of these two types of events.
