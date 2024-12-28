@@ -87,41 +87,26 @@ def check_nan_columns(df):
 
 #Merging the monthly datasets to obtain a dataset for 2017
 january_JFK = dataframes['T_ONTIME_REPORTING_january.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(january_JFK)) #191
 february_JFK = dataframes['T_ONTIME_REPORTING_february.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(february_JFK)) #128
 march_JFK = dataframes['T_ONTIME_REPORTING_march.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(march_JFK)) #167
 april_JFK = dataframes['T_ONTIME_REPORTING_april.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(april_JFK)) #139
 may_JFK = dataframes['T_ONTIME_REPORTING_may.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(may_JFK)) #160
 june_JFK = dataframes['T_ONTIME_REPORTING_june.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(june_JFK)) #134
 july_JFK = dataframes['T_ONTIME_REPORTING_july.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(july_JFK)) #192
 august_JFK = dataframes['T_ONTIME_REPORTING_august.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(august_JFK)) #180
 september_JFK = dataframes['T_ONTIME_REPORTING_september.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(september_JFK)) #206
 october_JFK = dataframes['T_ONTIME_REPORTING_october.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(october_JFK)) #253
 november_JFK = dataframes['T_ONTIME_REPORTING_november.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(november_JFK)) #220
 december_JFK = dataframes['T_ONTIME_REPORTING_december.csv'][lambda df: df["ORIGIN_AIRPORT_ID"] == 10135] 
-print(len(december_JFK)) #168
 #Total size = 2138
 year = [january_JFK, february_JFK, march_JFK, april_JFK, may_JFK, june_JFK, july_JFK, august_JFK, september_JFK, october_JFK, november_JFK, december_JFK]
 JFK_2017 = pd.concat(year, ignore_index=True)
 JFK_2017.drop(columns=['Unnamed: 0'], inplace=True)
-print(JFK_2017)
-#print(len(JFK_2017))
-
+#print(JFK_2017)
 
 #Setting the rights data types
-print(JFK_2017.info())
+#print(JFK_2017.info())
 JFK_2017['FL_DATE'] = pd.to_datetime(JFK_2017['FL_DATE'])
-
 
 #Hypothesis : we can replaces the missing values for delays by 0 because we suppose that a delay is more likely to be registered than no delay because it creates more frustration
 JFK_2017['WEATHER_DELAY'] = JFK_2017['WEATHER_DELAY'].fillna(0)
@@ -136,8 +121,8 @@ check_nan_columns(JFK_2017)
 #'ARR_TIME' has 39 valeurs NaN.
 JFK_2017 = JFK_2017.dropna(axis=0)
 check_nan_columns(JFK_2017) #nothing --> no more NaN
-print(len(JFK_2017)) #1919
-
+#print(len(JFK_2017)) 
+#1919
 
 #Combining departure time information to obtain a column with year, month, day, hour, minute for departure
 #'DEP_TIME' contains str with numbers indicating the hours and minutes through the format "hhmm"
@@ -148,13 +133,13 @@ JFK_2017['Minutes'] = JFK_2017['DEP_TIME'].str[2:].astype(int)  # Get minutes as
 JFK_2017['departure_time'] = pd.to_timedelta(JFK_2017['Hours'], unit='h') + pd.to_timedelta(JFK_2017['Minutes'], unit='m')
 JFK_2017['Full_Departure_Datetime'] = JFK_2017['FL_DATE'] + JFK_2017['departure_time']
 JFK_2017.drop(['Hours', 'Minutes', 'departure_time'], axis=1, inplace=True)
-print(JFK_2017[['FL_DATE', 'DEP_TIME', 'Full_Departure_Datetime']].head())
+#print(JFK_2017.head())
 
 #Isolating the data for machine learning 
 JFK_2017_no_number = JFK_2017[['Full_Departure_Datetime', 'FL_DATE','OP_UNIQUE_CARRIER','OP_CARRIER_AIRLINE_ID','OP_CARRIER','TAIL_NUM','OP_CARRIER_FL_NUM','ORIGIN_AIRPORT_ID','ORIGIN_AIRPORT_SEQ_ID','ORIGIN_CITY_MARKET_ID','DEST_AIRPORT_ID','DEST_CITY_MARKET_ID','DEST', 'DEP_TIME','ARR_TIME']]
 JFK_2017_number = JFK_2017[['DEP_DELAY','ARR_DELAY','CANCELLED','CARRIER_DELAY','WEATHER_DELAY','Full_Departure_Datetime']]
 JFK_2017_number['CANCELLED'] = JFK_2017_number['CANCELLED'].astype(int)
-print(JFK_2017_number.info())
+#print(JFK_2017_number.info())
 
 #Exporting the dataset for JFK planes
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017.csv", "w") as path:
@@ -169,21 +154,19 @@ with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/JFK_2017_number.csv", 
 
 
 
-#Part 1.2 : Pre-processing the weather data
 
 #We take only the data for the year 2017
 weather = dataframes['jfk_weather.csv']
-weather.drop(columns=['Unnamed: 0'], inplace=True)
-
+#print(weather.head())
 
 weather['DATE'] = pd.to_datetime(weather['DATE'])
 weather_2017 = weather[weather['DATE'].dt.year == 2017]
+weather_2017 = weather_2017.loc[:, ~weather_2017.columns.str.startswith('Unnamed')]
+
 #print(weather_2017.head())
 #print(weather_2017.tail())
-print(weather.info()) 
+#print(weather.info()) 
 #90 columns
-
-
 
 #Columns with "Monthly", "Hourly" ou "Daily" contains only one value for the unit they represent.
 # for example for a monthly columns, only the last day of the corresponding month contains a value
@@ -196,7 +179,7 @@ daily_columns = [col for col in weather_2017.columns if 'DAILY' in col]
 
 # Conversion in datetime type
 weather_2017['YearMonth'] = weather_2017['DATE'].dt.to_period('M')  # Extraire l'année et le mois
-weather_2017['YearDayHour'] = weather_2017['DATE'].dt.to_period('H')  # Extraire l'année, jour et heure
+weather_2017['YearDayHour'] = weather_2017['DATE'].dt.to_period('h')  # Extraire l'année, jour et heure
 weather_2017['YearDay'] = weather_2017['DATE'].dt.to_period('D')  # Extraire l'année et jour
 
 # Filling the NaN values
@@ -249,23 +232,14 @@ Celsius = ['HOURLYDRYBULBTEMPC', 'HOURLYWETBULBTEMPC', 'HOURLYDewPointTempC']
 weather_2017.drop(columns=Celsius, inplace=True)
 
 #We set all variables to be float, expect time
-print(weather_2017.head())
 #delete the two first columns because it starts with Unnamed 0 and DATE to convert the rest to float
-weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 2:].astype(float)], axis=1)
+weather_2017 = pd.concat([weather_2017[['DATE']], weather_2017.iloc[:, 1:].astype(float)], axis=1)
 
-print(weather_2017.info())
-print(weather_2017.head())
+#print(weather_2017.info())
+#print(weather_2017.head())
 
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/weather_2017.csv", "w") as path:
-    weather_2017.to_csv(path)
-
-
-
-
-#Part 1.3: merging the two datasets
-
-
-# Conversion of data time to numpy.datetime64 type to accelerate comparisons 
+    weather_2017.to_csv(path)# Conversion of data time to numpy.datetime64 type to accelerate comparisons 
 departure_times = JFK_2017_number['Full_Departure_Datetime'].values.astype('datetime64[m]')  # minutes
 weather_times = weather_2017['DATE'].values.astype('datetime64[m]')  # minutes
 
@@ -289,8 +263,8 @@ for departure_time in departure_times:
 # Combining all the rows that were accepted
 merged_df = pd.DataFrame(merged_rows, columns=np.concatenate([JFK_2017_number.columns, weather_2017.columns]))
 
-print(merged_df['Full_Departure_Datetime'])
-#only about 10 rows were lost for a tolerance of 31min: acceptable 
+#print(merged_df['Full_Departure_Datetime'])
+#only about 10 rows were lost for a tolerance of 30min: acceptable 
 
 # Uploading the data
 merged_df.rename(columns={'DATE': 'DATE_weather'}, inplace=True)
@@ -298,11 +272,10 @@ with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/plane_weather.csv", "w
     merged_df.to_csv(path)
 
 check_nan_columns(merged_df)
-print(merged_df.info())
+#print(merged_df.info())
 
 plane_weather_for_ML = merged_df.drop(columns=['Full_Departure_Datetime', 'DATE_weather'])
 with fs.open(f"{YOUR_BUCKET}/diffusion/Pre-processed_data/plane_weather_for_ML.csv", "w") as path:
     plane_weather_for_ML.to_csv(path)
 
-print(plane_weather_for_ML.info())
-
+#print(plane_weather_for_ML.info())
