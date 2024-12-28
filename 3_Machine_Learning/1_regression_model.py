@@ -230,7 +230,7 @@ XGBoost shows the highest error with Feature Importance (MAE: 32.88, RMSE: 92.90
 
 # This was predictable, because there are really few delays due to weather,
 
-# The feature importance plot provides insights into the factors contributing to departure delays.
+"""# The feature importance plot provides insights into the factors contributing to departure delays.
 # HOURLYWindSpeed stands out as the most important feature, aligning with expectations since wind speed directly impacts flight schedules.
 # Other weather-related variables like HOURLYRelativeHumidity, HOURLYStationPressure also have notable contributions.
 # Interestingly, DAILYAverageStationPressure and HOURLYWETBULBTEMPF indicate that both daily and hourly weather metrics are relevant.
@@ -239,7 +239,7 @@ XGBoost shows the highest error with Feature Importance (MAE: 32.88, RMSE: 92.90
 # The feature importance highlights key weather variables like wind speed and humidity, and the
 # minimal delays caused by weather reflect the technological advancements and robustness of modern 
 # aircraft in handling adverse conditions.
-
+"""
 """
 Key Observations:
 Feature Importance provides better results across all models compared to PCA by focusing on relevant features, reducing noise, and ensuring better interpretability.
