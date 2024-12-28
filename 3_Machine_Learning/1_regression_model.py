@@ -5,6 +5,7 @@
 
 # Import the packages and load the data
 # pip install openpyxl
+# pip install scikit-learn==1.5.2
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
@@ -12,6 +13,7 @@ from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from xgboost import XGBRegressor
 import matplotlib.pyplot as plt
+from math import sqrt
 import os
 import s3fs
 
@@ -38,8 +40,6 @@ for files in fs.ls(f"{MY_BUCKET}/diffusion/Pre-processed_data"):
     # Dictionnary of dataframes with the name of the file as a key
     dataframes[f"{files.split('/')[-1]}"] = df_imported
 
-print(dataframes['plane_weather.csv'])
-
 
 #Load the data
 plane_weather = dataframes['plane_weather.csv']
@@ -56,7 +56,6 @@ weather_2017.drop(columns=['Unnamed: 0'], inplace=True)
 
 plane_weather['Full_Departure_Datetime'] = pd.to_datetime(plane_weather['Full_Departure_Datetime'])
 plane_weather['DATE_weather'] = pd.to_datetime(plane_weather['DATE_weather'])
-print(plane_weather.info())
 
 df = plane_weather_for_ML
 
@@ -119,9 +118,9 @@ results = {
         mean_absolute_error(y, y_pred_xgb)
     ],
     'RMSE': [
-        mean_squared_error(y, y_pred_lin, squared=False),
-        mean_squared_error(y, y_pred_rf, squared=False),
-        mean_squared_error(y, y_pred_xgb, squared=False)
+        sqrt(mean_squared_error(y, y_pred_lin)),
+        sqrt(mean_squared_error(y, y_pred_rf)),
+        sqrt(mean_squared_error(y, y_pred_xgb))
     ],
     'R^2': [
         r2_score(y, y_pred_lin),
@@ -186,9 +185,9 @@ results = {
         mean_absolute_error(y, y_pred_xgb)
     ],
     'RMSE': [
-        mean_squared_error(y, y_pred_lin, squared=False),
-        mean_squared_error(y, y_pred_rf, squared=False),
-        mean_squared_error(y, y_pred_xgb, squared=False)
+        sqrt(mean_squared_error(y, y_pred_lin)),
+        sqrt(mean_squared_error(y, y_pred_rf)),
+        sqrt(mean_squared_error(y, y_pred_xgb))
     ],
     'R^2': [
         r2_score(y, y_pred_lin),
