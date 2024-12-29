@@ -18,7 +18,7 @@ Can flight delays be predicted accurately using weather data? What is the reliab
 
 ## Models Used
 
-We tested several machine learning techniques to identify the best-performing model for this task, combined with PCA or Feature Importance:
+We tested several machine learning techniques to identify the best-performing model for this task, combined with PCA or Feature Importance to reduce the number of variables:
 
 1. **Linear Regression**:
    - Selected as the final model for its consistent predictions, simplicity, and interpretability.
@@ -26,7 +26,7 @@ We tested several machine learning techniques to identify the best-performing mo
 2. **Random Forest**:
    - Explored for its ability to capture non-linear relationships, but the predictions lacked consistency.
 3. **XGBoost**:
-   - Known for its high performance in many contexts but yielded lower predictive power in this case.
+   - Known for its high performance in many contexts but yielded lower predictive power in this case. 
 
 
 The final model, Linear Regression with feature importance, provided the best balance between accuracy and interpretability.
