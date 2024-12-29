@@ -69,5 +69,5 @@ The app is seamlessly integrated into the project via a **notebook**, allowing u
 ## Reproducibility
 
 Reproducibility is ensured through the execution of the notebook, which integrates all components of the project:
-- The main **notebook** contains the complete workflow and integrates all Python modules coded throughout the project.
+- The main **notebook** ([notebook_final.ipynb](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/notebook_final.ipynb)) contains the complete workflow and integrates all Python modules coded throughout the project.
 - The **Streamlit app** is created in a separate folder due to its unique structure but can be launched directly from the notebook.
