@@ -1,5 +1,7 @@
 #Data-preprocessing
 
+from requirements import requirements
+
 #Download the files from leoacpr by typing your SSP Cloud username
 #This can take a while because the files are heavy
 
