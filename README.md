@@ -57,19 +57,17 @@ To train and deploy our models, we used two datasets and two APIs:
 
 ## Application
 
-The project includes a **Streamlit web application** for real-time flight delay predictions:
+The project includes a **Streamlit web application** for real-time flight delay predictions, accessible here: [Flight Delay Prediction](https://flight-delay-prediction-2024.streamlit.app/)
+
+### Usage
+- Users input their Aerodatabox API token.
 - Users input a flight number and date.
 - The app fetches live data from APIs and predicts potential delays based on weather conditions.
 - The predicted delay is visually highlighted (red for delays, green for early arrivals).
 
 The app is seamlessly integrated into the project via a **notebook**, allowing users to launch it directly with an accessible Streamlit link.
 
-Please note that the Open-Meteo API **doesn't require** a token, while the Aerodatabox **does** require one. For safety reason, this token is not saved in our repo. You can put the token in the application directly 
-
-[Flight Delay Prediction](https://flight-delay-prediction-2024.streamlit.app/)
-
-([App/config.py](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/App/config.py)) before running the app.
-
+Please note that the Open-Meteo API **doesn't require** a token, while the Aerodatabox **does** require one. For safety reason, this token is not saved in our repo. You can put the token in the application directly.
 ---
 
 ## Reproducibility
