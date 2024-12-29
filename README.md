@@ -1,12 +1,13 @@
 # Flight Delay Prediction Project
 
-### Authors: *Léo LEROY, Léo DONZIL, Lisa CHARDON-DENIZOT*
+### Authors: *Léo LEROY, Léo DONZIL, Lisa CHARDON--DENIZOT*
 
 ---
 
 ## Introduction
 
 Flight delays disrupt travel plans, increase costs, and reduce overall efficiency in the aviation industry. This project aims to create a predictive model for flight delays based on weather data. The goal is to provide a practical tool for anticipating delays, leveraging machine learning models, and integrating real-time data through APIs.
+Our code is available on [main.ipynb](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/main.ipynb)
 
 ---
 
