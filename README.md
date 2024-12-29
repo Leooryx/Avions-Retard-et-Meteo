@@ -64,10 +64,12 @@ The project includes a **Streamlit web application** for real-time flight delay 
 
 The app is seamlessly integrated into the project via a **notebook**, allowing users to launch it directly with an accessible Streamlit link.
 
+Please note that the Open-Meteo API **doesn't require** a token, while the Aerodatabox **does** require one. For safety reason, this token is not saved in our repo. You can put the token in the ([App/config.py](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/App/config.py)) before running the app.
+
 ---
 
 ## Reproducibility
 
 Reproducibility is ensured through the execution of the notebook, which integrates all components of the project:
-- The main **notebook** ([notebook_final.ipynb](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/notebook_final.ipynb)) contains the complete workflow and integrates all Python modules coded throughout the project.
-- The **Streamlit app** is created in a separate folder due to its unique structure but can be launched directly from the notebook.
+- The main **notebook** ([main.ipynb](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/main.ipynb)) contains the complete workflow and integrates all Python modules coded throughout the project.
+- The **Streamlit app** is created in a separate folder due to its unique structure but can be launched directly from the notebook, after putting a **Aerodatabox token** in the ([App/config.py](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/App/config.py))
