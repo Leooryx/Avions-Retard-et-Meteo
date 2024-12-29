@@ -1,5 +1,7 @@
 import os
 
+load_dotenv()
+
 # Remplissez le token ici si vous exécutez localement
 API_TOKEN = "votre_token_secret"  # Remplacer par le token envoyé par mail
 
