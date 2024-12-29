@@ -71,15 +71,3 @@ The app is seamlessly integrated into the project via a **notebook**, allowing u
 Reproducibility is ensured through the execution of the notebook, which integrates all components of the project:
 - The main **notebook** contains the complete workflow and integrates all Python modules coded throughout the project.
 - The **Streamlit app** is created in a separate folder due to its unique structure but can be launched directly from the notebook.
-
----
-
-## Conclusion
-
-The **Linear Regression model with feature importance** was chosen for its balance between interpretability and consistency. While the R² values indicated limited predictive power, the model generated coherent and realistic delay predictions. This highlights the challenge of predicting delays based solely on weather data.
-
-Future improvements could include:
-- Introducing penalties for delays based on seasonal trends (e.g., higher delays in December).
-- Adding non-weather-related variables like air traffic and airline schedules to enhance model accuracy.
-
-Our project demonstrates the potential of combining datasets, APIs, and machine learning to address complex real-world problems in aviation.
