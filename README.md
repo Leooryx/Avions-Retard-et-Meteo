@@ -64,7 +64,11 @@ The project includes a **Streamlit web application** for real-time flight delay 
 
 The app is seamlessly integrated into the project via a **notebook**, allowing users to launch it directly with an accessible Streamlit link.
 
-Please note that the Open-Meteo API **doesn't require** a token, while the Aerodatabox **does** require one. For safety reason, this token is not saved in our repo. You can put the token in the ([App/config.py](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/App/config.py)) before running the app.
+Please note that the Open-Meteo API **doesn't require** a token, while the Aerodatabox **does** require one. For safety reason, this token is not saved in our repo. You can put the token in the application directly 
+
+[Flight Delay Prediction](https://flight-delay-prediction-2024.streamlit.app/)
+
+([App/config.py](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/App/config.py)) before running the app.
 
 ---
 
