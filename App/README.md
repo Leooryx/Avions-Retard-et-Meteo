@@ -6,10 +6,10 @@ This Streamlit app allows users to search for flight information by entering a f
 1. Clone the repository in your Onyxia environment.
 
 2. Install dependencies:
-pip install -r /home/onyxia/work/Avions-Retard-et-Meteo/App/requirements.txt
+pip install -r Avions-Retard-et-Meteo/App/requirements.txt
 
 3. Run the app:
-streamlit run /home/onyxia/work/Avions-Retard-et-Meteo/App/app.py
+streamlit run Avions-Retard-et-Meteo/App/app.py
 
 4. Access the app at the provided URL.
 
