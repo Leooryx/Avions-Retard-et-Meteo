@@ -23,10 +23,8 @@ We tested several machine learning techniques to identify the best-performing mo
 1. **Linear Regression**:
    - Selected as the final model for its consistent predictions, simplicity, and interpretability.
    - Enhanced with feature importance for better relevance and reduced noise.
-
 2. **Random Forest**:
    - Explored for its ability to capture non-linear relationships, but the predictions lacked consistency.
-
 3. **XGBoost**:
    - Known for its high performance in many contexts but yielded lower predictive power in this case.
 
@@ -43,7 +41,6 @@ To train and deploy our models, we used two datasets and two APIs:
 1. **Plane Data**:
    - **[Bureau of Transportation Statistics](https://www.transtats.bts.gov/DL_SelectFields.aspx?gnoyr_VQ=FGJ&QO_fu146_anzr=b0-gvzr)**:
      Dataset containing detailed flight information, including delays, departure/arrival times, and airport details. We focused on 2017 data due to its availability and manageable size.
-
 2. **Weather Data**:
    - **[IBM Weather Data](https://developer.ibm.com/exchanges/data/all/jfk-weather-data/)**:
      Historical weather data from JFK airport in 2017.
@@ -52,7 +49,6 @@ To train and deploy our models, we used two datasets and two APIs:
 1. **[Aerodatabox API](https://aerodatabox.com/)**:
    - Provides real-time flight information, including schedules, aircraft models, and statuses.
    - Essential for linking flight metadata to weather conditions.
-
 2. **[Open-Meteo API](https://open-meteo.com/)**:
    - Supplies historical and forecasted weather data such as temperature, wind speed, visibility, and humidity.
    - Free and versatile, allowing precise alignment of weather data with flight details.
