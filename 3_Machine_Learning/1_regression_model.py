@@ -270,6 +270,7 @@ model_path = 'Avions-Retard-et-Meteo/3_Machine_Learning/linear_regression_model.
 joblib.dump(lin_reg, model_path)
 
 
+"""
 # Afficher les coefficients
 coefficients = lin_reg.coef_
 features = X_selected.columns  # Les noms des colonnes sélectionnées
@@ -277,3 +278,4 @@ features = X_selected.columns  # Les noms des colonnes sélectionnées
 # Afficher les coefficients avec leurs noms
 for feature, coef in zip(features, coefficients):
     print(f"{feature}: {coef}")
+"""
