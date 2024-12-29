@@ -1,5 +1,15 @@
 #Data-exploration
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import os
+import numpy as np
+from datetime import timedelta
+import s3fs
+import seaborn as sns
+import matplotlib.dates as mdates
+
 
 #Download the files from leoacpr by typing your SSP Cloud username
 #This can take a while because the files are heavy

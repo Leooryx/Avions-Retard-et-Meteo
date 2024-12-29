@@ -1,7 +1,12 @@
 #Data-preprocessing
 
-import subprocess
-subprocess.run(["pip", "install", "-r", "project_requirements.txt"])
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import os
+import numpy as np
+from datetime import timedelta
+import s3fs
 
 #Download the files from leoacpr by typing your SSP Cloud username
 #This can take a while because the files are heavy
