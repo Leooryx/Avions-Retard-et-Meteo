@@ -3,25 +3,6 @@
 # It could be possible that the variable weather delay don't include all of them, and maybe there
 # is a way to predict them
 
-# Import the packages and load the data
-# pip install openpyxl
-# pip install scikit-learn==1.5.2
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_val_predict
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from xgboost import XGBRegressor
-import matplotlib.pyplot as plt
-from math import sqrt
-import os
-import s3fs
-import joblib
-
-
-
-
-
 
 #Download the files from leoacpr by typing your SSP Cloud username
 #This can take a while because the files are heavy
