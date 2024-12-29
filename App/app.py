@@ -39,32 +39,30 @@ if search_button and flight_number and flight_date:
             weather_info = []
             
             # Departure info
-            departure_info.append(f"**Status:** {flight['status']}")
-            departure_info.append(f"**Departure airport:** {flight['departure_airport']}")
+            departure_info.append(f"- **Status:** {flight['status']}")
+            departure_info.append(f"- **Departure airport:** {flight['departure_airport']}")
             
             departure_time = flight.get('departure_time', 'Unknown')
             if departure_time != 'Unknown':
                 try:
                     formatted_departure_time = pd.to_datetime(departure_time).strftime('%H:%M, %a %d %b %Y')
-                    departure_info.append(f"**Departure time:** {formatted_departure_time} (local)")
+                    departure_info.append(f"- **Departure time:** {formatted_departure_time} (local)")
                 except Exception:
-                    departure_info.append("**Departure time:** Error parsing date")
+                    departure_info.append("- **Departure time:** Error parsing date")
             else:
-                departure_info.append("**Departure time:** Unknown")
+                departure_info.append("- **Departure time:** Unknown")
 
-            departure_info.append(f"**Arrival airport:** {flight['arrival_airport']}")
+            departure_info.append(f"- **Arrival airport:** {flight['arrival_airport']}")
 
             arrival_time = flight.get('arrival_time', 'Unknown')
             if arrival_time != 'Unknown':
                 try:
                     formatted_arrival_time = pd.to_datetime(arrival_time).strftime('%H:%M, %a %d %b %Y')
-                    departure_info.append(f"**Arrival time:** {formatted_arrival_time} (local)")
+                    departure_info.append(f"- **Arrival time:** {formatted_arrival_time} (local)")
                 except Exception:
-                    departure_info.append("**Arrival time:** Error parsing date")
+                    departure_info.append("- **Arrival time:** Error parsing date")
             else:
-                departure_info.append("**Arrival time:** Unknown")
-
-            departure_info.append(f"**Aircraft model:** {flight['aircraft_model']}")
+                departure_info.append("- **Arrival time:** Unknown")
 
             # Retrieve departure airport coordinates
             departure_airport_coords = {
@@ -106,7 +104,6 @@ if search_button and flight_number and flight_date:
                             weather_info.append(f"- **Wet-bulb temperature:** {weather_at_departure['HOURLYWETBULBTEMPF']:.1f} °F")
                             weather_info.append(f"- **Relative humidity:** {weather_at_departure['HOURLYRelativeHumidity']} %")
                             weather_info.append(f"- **Visibility:** {weather_at_departure['HOURLYVISIBILITY']:.1f} miles")
-                            weather_info.append(f"- **Estimated delay:** {lin_reg.predict(weather_at_departure.to_frame().T)[0]:.2f} minutes")
                         else:
                             weather_info.append("Weather Conditions at Departure: Data Unavailable")
                 else:
@@ -124,6 +121,38 @@ if search_button and flight_number and flight_date:
                 st.markdown("### Weather Information")
                 for info in weather_info:
                     st.write(info)
+            
+            st.markdown(
+                f"""
+                <div style="text-align: center; font-size: 15px;">
+                    <strong>Aircraft model: {flight['aircraft_model']}</strong>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            # Calculate estimated delay
+            estimated_delay = lin_reg.predict(weather_at_departure.to_frame().T)[0]
+
+            # Determine the color and message based on delay
+            if estimated_delay > 0:
+                delay_message = f"Estimated delay: {estimated_delay:.2f} minutes"
+                delay_color = "red"
+            else:
+                delay_message = f"Estimated advance: {abs(estimated_delay):.2f} minutes"
+                delay_color = "green"
+
+            # Display the message in styled format
+            st.markdown(
+                f"""
+                <div style="text-align: center; font-size: 24px; color: {delay_color};">
+                    <strong>{delay_message}</strong>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
 
             # Display aircraft image
             if flight['aircraft_image']:
