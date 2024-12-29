@@ -72,4 +72,4 @@ Please note that the Open-Meteo API **doesn't require** a token, while the Aerod
 
 Reproducibility is ensured through the execution of the notebook, which integrates all components of the project:
 - The main **notebook** ([main.ipynb](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/main.ipynb)) contains the complete workflow and integrates all Python modules coded throughout the project.
-- The **Streamlit app** is created in a separate folder due to its unique structure but can be launched directly from the notebook, after putting a **Aerodatabox token** in the ([App/config.py](https://github.com/Leooryx/Avions-Retard-et-Meteo/blob/main/App/config.py))
+- The **Streamlit app** is created in a separate folder due to its unique structure but can be launched directly from the notebook.
